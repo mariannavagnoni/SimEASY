@@ -1,0 +1,234 @@
+#Macro generating gamma at a fixed energy step 
+# Change the number of threads
+#/run/numberOfThreads 24
+
+
+# Initialize
+# ----------
+
+/run/initialize
+
+
+/random/setSeeds 123 456
+
+# Define source
+# ----------
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 250 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 500 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 750 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 1000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 1250 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 1500 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 1750 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 2000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 2250 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 2500 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 2750 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 3000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 4000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 5000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 6000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 7000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 8000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 9000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 10000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000
+ 
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 11000 keV
+  
+/run/printProgress 100000
+/run/beamOn 1000000

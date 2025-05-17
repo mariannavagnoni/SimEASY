@@ -1,0 +1,26 @@
+#Macro generating gamma at a fixed energy step 
+# Change the number of threads
+#/run/numberOfThreads 24
+
+
+# Initialize
+# ----------
+
+/run/initialize
+
+
+/random/setSeeds 123 456
+
+# Define source
+# ----------
+/generator/setSource gun
+/generator/setPosition 0 0 0.1 m
+/generator/setLength   0.22 m
+/generator/setRadius   1.1 cm
+   
+/gun/particle gamma
+/gun/energy 4000 keV
+  
+/run/printProgress
+/run/beamOn 30
+
