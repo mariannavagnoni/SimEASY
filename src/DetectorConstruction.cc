@@ -218,19 +218,17 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
     G4PVPlacement* Al_enclosure = new G4PVPlacement(rot, pos_out, enclosure, "Outer Box Logic", worldLogic, false, 1, checkOverlaps);
 
-    //for(int i=1; i<=imax; i++){
-        //double theta=i*(360./imax)*CLHEP::degree;
+    for(int i=1; i<=imax; i++){
+        double theta=i*(360./imax)*CLHEP::degree;
 
-        //G4RotationMatrix *rot=new G4RotationMatrix();
-        //rot->rotateZ(-1*theta);
-//
-//
-        //G4ThreeVector pos_out = G4ThreeVector(r*cos(theta), r*sin(theta), 0.*CLHEP::mm);
-//
-//
-        //G4PVPlacement* Al_enclosure = new G4PVPlacement(rot, pos_out, enclosure, "Outer Box Logic", worldLogic, false, i, checkOverlaps);
+        G4RotationMatrix *rot=new G4RotationMatrix();
+        rot->rotateZ(-1*theta);
 
-       /* if((enclosure->GetNoDaughters())== 0)
+        G4ThreeVector pos_out = G4ThreeVector(r*cos(theta), r*sin(theta), 0.*CLHEP::mm);
+
+        G4PVPlacement* Al_enclosure = new G4PVPlacement(rot, pos_out, enclosure, "Outer Box Logic", worldLogic, false, i, checkOverlaps);
+
+       if((enclosure->GetNoDaughters())== 0)
 
         {
             G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
@@ -251,10 +249,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
             G4cout << "Daughter volume already exists" << std::endl;
         }
 
-
-        */
-
-    //}
+    }
 
     return worldPhys;
 }
