@@ -30,6 +30,7 @@
 #include "TFile.h"
 
 // Geant4 Headers
+#include "G4RunManagerFactory.hh"
 #include "G4RunManager.hh"
 #include "G4UImanager.hh"
 #include "G4UIterminal.hh"
@@ -93,9 +94,10 @@ int main( int argc, char *argv[])
     num_events = atoi(argv[3]); //converted from a string to integer
 
     int nThreads = 0;
-    if (argc == 5) {
-      nThreads = G4UIcommand::ConvertToInt(argv[4]);
-    }
+    // This part is always false since argc must be <= 4
+    // if (argc == 5) {
+    //   nThreads = G4UIcommand::ConvertToInt(argv[4]);
+    // }
 
     //create a DataBin object (see DataBin.hh)
 
@@ -118,14 +120,14 @@ int main( int argc, char *argv[])
     G4Random::setTheEngine(new CLHEP::RanecuEngine);
 
     // Construct the MT run manager
-
+  auto runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
   #ifdef G4MULTITHREADED
-    auto runManager = new G4MTRunManager;
+    //auto runManager = new G4MTRunManager;
     if ( nThreads > 0 ) {
       runManager->SetNumberOfThreads(nThreads);
     }
-  #else
-    auto runManager = new G4RunManager;
+  //#else
+  //  auto runManager = new G4RunManager;
   #endif
 
     //G4ScoringManager* scoringManager = G4ScoringManager::GetScoringManager();
@@ -141,7 +143,7 @@ int main( int argc, char *argv[])
     auto actionInitialization = new B4dActionInitialization(&levels, databin);
     runManager->SetUserInitialization(actionInitialization);
 
-    runManager->Initialize();
+    //runManager->Initialize();
 
     // Initialize visualization
     G4VisManager* visManager = new G4VisExecutive;
@@ -156,9 +158,7 @@ int main( int argc, char *argv[])
 
     if(macro == "nomac")
     {
-        //runManager->SetUserAction(new PrimaryGeneratorAction(&levels , databin));
         //runManager->Initialize();
-        //runManager->BeamOn(num_events);
 
         string word;
         G4cout << "Type vis to start visualization" << std::endl;
@@ -186,7 +186,6 @@ int main( int argc, char *argv[])
 
             fin.close();
 
-            runManager->SetUserAction(new PrimaryGeneratorAction(&levels , databin));
             runManager->Initialize();
 
             G4String command = "/control/execute";
