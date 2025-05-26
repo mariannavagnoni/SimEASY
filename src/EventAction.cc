@@ -24,11 +24,11 @@
 // ********************************************************************
 //
 //
-/// \file B4dEventAction.cc
-/// \brief Implementation of the B4dEventAction class
+/// \file EventAction.cc
+/// \brief Implementation of the EventAction class
 
-#include "B4dEventAction.hh"
-#include "B4Analysis.hh"
+#include "EventAction.hh"
+#include "Analysis.hh"
 #include "G4RunManager.hh"
 #include "G4Event.hh"
 #include "G4SDManager.hh"
@@ -46,7 +46,7 @@ using CLHEP::m;
     
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
     
-B4dEventAction::B4dEventAction() : G4UserEventAction()
+EventAction::EventAction() : G4UserEventAction()
 {
     G4RunManager* fRM= G4RunManager::GetRunManager();
     const G4Event* event = fRM-> GetCurrentEvent();
@@ -54,17 +54,17 @@ B4dEventAction::B4dEventAction() : G4UserEventAction()
     
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo.....
     
-B4dEventAction::~B4dEventAction(){}
+EventAction::~EventAction(){}
     
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
     
 
-void B4dEventAction::BeginOfEventAction(const G4Event*  /*event*/){}
+void EventAction::BeginOfEventAction(const G4Event*  /*event*/){}
     
     
     //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
     
-void B4dEventAction::EndOfEventAction(const G4Event* event)
+void EventAction::EndOfEventAction(const G4Event* event)
 {
     auto userInformation = static_cast<UserEventInformation*>(event->GetUserInformation());
     

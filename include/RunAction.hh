@@ -24,41 +24,50 @@
 // ********************************************************************
 //
 //
-/// \file B4dActionInitialization.cc
-/// \brief Implementation of the B4dActionInitialization class
+/// \file RunAction.hh
+/// \brief Definition of the RunAction class
 
-#include "B4dActionInitialization.hh"
+#ifndef RunAction_h
+#define RunAction_h 1
+
+#include "G4UserRunAction.hh"
+#include "G4UImessenger.hh"
+#include "G4UIcmdWithAString.hh"
+#include "G4Run.hh"
+#include "globals.hh"
+//incluso ora
 #include "PrimaryGeneratorAction.hh"
-#include "B4RunAction.hh"
-#include "B4dEventAction.hh"
 
-//modificato
-#include "Levels.hh"
-#include "DataBin.hh"
-#include "readlevels.hh"
+class G4Run;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+/// Run action class
+///
 
-B4dActionInitialization::B4dActionInitialization(levelvec* l, DataBin* d) : G4VUserActionInitialization(), levels(l), databin(d){}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-B4dActionInitialization::~B4dActionInitialization(){}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void B4dActionInitialization::BuildForMaster() const
+class RunAction : public G4UserRunAction, public G4UImessenger
 {
-  SetUserAction(new B4RunAction);
-}
+  public:
+    RunAction();
+    virtual ~RunAction();
+    void SetParticleGun(G4ParticleGun* gun);
+    void SetParticleEnergy(G4double energy);
+    void SetParticleID(G4int ID);
+    
+    //virtual void BeginOfRunAction(const G4Run*, G4double nEvt);
+    virtual void BeginOfRunAction(const G4Run*);
+    virtual void   EndOfRunAction(const G4Run*);
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+    void SetNewValue (G4UIcommand *command, G4String newValue);
+    void SetNumberOfEvents(G4double numEvents);//implement it in RunAction.cc
+    
+private:
+    G4ParticleGun* particleGun;
+    G4double m_numEvents;
+    //G4String m_fileName="test_6NaI_14.5cm_10MeV";
+    //G4String m_fileName="test_6NaI_15cm_10949keV";
+    G4String m_fileName="test_6NaI_15cm_11329keV_nndc";
+    G4UIcmdWithAString *m_cmdSetFileName = nullptr;
+};
 
-void B4dActionInitialization::Build() const
-{
-  SetUserAction(new PrimaryGeneratorAction(levels, databin));
-  SetUserAction(new B4RunAction);
-  SetUserAction(new B4dEventAction);
-}
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+#endif
+

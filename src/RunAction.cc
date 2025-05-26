@@ -24,27 +24,31 @@
 // ********************************************************************
 //
 //
-/// \file B4RunAction.cc
-/// \brief Implementation of the B4RunAction class
+/// \file RunAction.cc
+/// \brief Implementation of the RunAction class
 
-#include "B4RunAction.hh"
-#include "B4Analysis.hh"
+#include "RunAction.hh"
+#include "Analysis.hh"
 
 #include "G4Run.hh"
 #include "G4RunManager.hh"
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
-B4RunAction::B4RunAction()
+RunAction::RunAction()
+{
+  G4cout << ">>> RunAction constructed" << G4endl;
+}
+
+RunAction::~RunAction()
 {}
 
-B4RunAction::~B4RunAction()
-{}
-
-void B4RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
+void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
 
     //initialize the analysis manager
     G4VAnalysisManager *analysisManager = G4ToolsAnalysisManager::Instance();
+
+    G4cout << ">>> RunAction::BeginOfRunAction called <<<" << G4endl;
 
     //get the ID to distinguish between each run (useful for macros)
     G4int runID = run->GetRunID()+1;
@@ -120,7 +124,7 @@ void B4RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
 
 }
 
-void B4RunAction::EndOfRunAction(const G4Run* run){
+void RunAction::EndOfRunAction(const G4Run* run){
 
 
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
@@ -130,7 +134,7 @@ void B4RunAction::EndOfRunAction(const G4Run* run){
 }
 
 
-void B4RunAction::SetNewValue (G4UIcommand *command, G4String newValue) {
+void RunAction::SetNewValue (G4UIcommand *command, G4String newValue) {
     if (command == m_cmdSetFileName) {
         m_fileName = newValue;
     }
@@ -139,7 +143,7 @@ void B4RunAction::SetNewValue (G4UIcommand *command, G4String newValue) {
     }
 }
 
-void B4RunAction::SetNumberOfEvents(G4double numEvents){
+void RunAction::SetNumberOfEvents(G4double numEvents){
     m_numEvents = numEvents;
 
 }

@@ -24,11 +24,11 @@
 // ********************************************************************
 //
 //
-/// \file B4dEventAction.hh
-/// \brief Definition of the B4dEventAction class
+/// \file EventAction.hh
+/// \brief Definition of the EventAction class
 
-#ifndef B4dEventAction_h
-#define B4dEventAction_h 1
+#ifndef EventAction_h
+#define EventAction_h 1
 #include "Hit.hh"
 #include "G4UserEventAction.hh"
 #include "G4VSensitiveDetector.hh"
@@ -43,11 +43,11 @@
 /// deposit and track lengths of charged particles in Absober and Gap layers
 /// stored in the hits collections.
 
-class B4dEventAction : public G4UserEventAction
+class EventAction : public G4UserEventAction
 {
 public:
-    B4dEventAction();
-    virtual ~B4dEventAction();
+    EventAction();
+    virtual ~EventAction();
     
     virtual void  BeginOfEventAction(const G4Event* event/*event*/);
     

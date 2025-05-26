@@ -24,50 +24,20 @@
 // ********************************************************************
 //
 //
-/// \file B4RunAction.hh
-/// \brief Definition of the B4RunAction class
+/// \file Analysis.hh
+/// \brief Selection of the analysis technology
 
-#ifndef B4RunAction_h
-#define B4RunAction_h 1
+#ifndef Analysis_h
+#define Analysis_h 1
 
-#include "G4UserRunAction.hh"
-#include "G4UImessenger.hh"
-#include "G4UIcmdWithAString.hh"
-#include "G4Run.hh"
-#include "globals.hh"
-//incluso ora
-#include "PrimaryGeneratorAction.hh"
 
-class G4Run;
-
-/// Run action class
-///
-
-class B4RunAction : public G4UserRunAction, public G4UImessenger
-{
-  public:
-    B4RunAction();
-    virtual ~B4RunAction();
-    void SetParticleGun(G4ParticleGun* gun);
-    void SetParticleEnergy(G4double energy);
-    void SetParticleID(G4int ID);
-    
-    //virtual void BeginOfRunAction(const G4Run*, G4double nEvt);
-    virtual void BeginOfRunAction(const G4Run*);
-    virtual void   EndOfRunAction(const G4Run*);
-
-    void SetNewValue (G4UIcommand *command, G4String newValue);
-    void SetNumberOfEvents(G4double numEvents);//implement it in B4RunAction.cc
-    
-private:
-    G4ParticleGun* particleGun;
-    G4double m_numEvents;
-    //G4String m_fileName="test_6NaI_14.5cm_10MeV";
-    //G4String m_fileName="test_6NaI_15cm_10949keV";
-    G4String m_fileName="test_6NaI_15cm_11329keV_nndc";
-    G4UIcmdWithAString *m_cmdSetFileName = nullptr;
-};
-
+// all the headers needed for the root analysis
+#include "G4RootAnalysisManager.hh"
+#include "G4AnalysisManager.hh"
+#include "G4UnitsTable.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4ToolsAnalysisManager.hh"
+//#include "g4cvs.hh"
+//#include "g4xml.hh"
 
 #endif
-

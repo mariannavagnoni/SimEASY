@@ -24,20 +24,32 @@
 // ********************************************************************
 //
 //
-/// \file B4Analysis.hh
-/// \brief Selection of the analysis technology
+/// \file ActionInitialization.hh
+/// \brief Definition of the ActionInitialization class
 
-#ifndef B4Analysis_h
-#define B4Analysis_h 1
+#ifndef ActionInitialization_h
+#define ActionInitialization_h 1
 
+#include "G4VUserActionInitialization.hh"
+#include "Levels.hh"
+#include "DataBin.hh"
 
-// all the headers needed for the root analysis
-#include "G4RootAnalysisManager.hh"
-#include "G4AnalysisManager.hh"
-#include "G4UnitsTable.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4ToolsAnalysisManager.hh"
-//#include "g4cvs.hh"
-//#include "g4xml.hh"
+/// Action initialization class.
+///
+
+class ActionInitialization : public G4VUserActionInitialization
+{
+  public:
+    ActionInitialization(levelvec* l, DataBin* d);
+    virtual ~ActionInitialization();
+
+    virtual void BuildForMaster() const override;
+    virtual void Build() const override;
+  private:
+    levelvec* levels;
+    DataBin* databin;
+};
 
 #endif
+
+

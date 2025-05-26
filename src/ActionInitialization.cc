@@ -24,32 +24,49 @@
 // ********************************************************************
 //
 //
-/// \file B4dActionInitialization.hh
-/// \brief Definition of the B4dActionInitialization class
+/// \file ActionInitialization.cc
+/// \brief Implementation of the ActionInitialization class
 
-#ifndef B4dActionInitialization_h
-#define B4dActionInitialization_h 1
+#include "ActionInitialization.hh"
+#include "PrimaryGeneratorAction.hh"
+#include "RunAction.hh"
+#include "EventAction.hh"
 
-#include "G4VUserActionInitialization.hh"
+//modificato
 #include "Levels.hh"
 #include "DataBin.hh"
+#include "readlevels.hh"
 
-/// Action initialization class.
-///
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class B4dActionInitialization : public G4VUserActionInitialization
+ActionInitialization::ActionInitialization(levelvec* l, DataBin* d) : G4VUserActionInitialization(), levels(l), databin(d){}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+ActionInitialization::~ActionInitialization(){}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+
+    ////////////////
+    //
+    // Work needed to get MT running: Need separate RunAction for master (BuildForMaster) and worker (Build)
+    //
+    ///////////
+
+void ActionInitialization::BuildForMaster() const
 {
-  public:
-    B4dActionInitialization(levelvec* l, DataBin* d);
-    virtual ~B4dActionInitialization();
+  SetUserAction(new RunAction);
+}
 
-    virtual void BuildForMaster() const override;
-    virtual void Build() const override;
-  private:
-    levelvec* levels;
-    DataBin* databin;
-};
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#endif
+void ActionInitialization::Build() const
+{
+  G4cout << ">>> ActionInitialization::Build called" << G4endl;
+  SetUserAction(new PrimaryGeneratorAction(levels, databin));
+  SetUserAction(new RunAction);
+  SetUserAction(new EventAction);
+}
 
-
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

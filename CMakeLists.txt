@@ -2,7 +2,7 @@
 # Setup the project
 #
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-project(B4d)
+project(SimEASY)
 
 #----------------------------------------------------------------------------
 # Find Geant4 package, activating all available UI and Vis drivers by default
@@ -51,10 +51,10 @@ include_directories(${ROOT_INCLUDE_DIRS})
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
-add_executable(NaI exampleB4d.cc ${sources} ${headers} ${macros})
-# target_link_libraries(NaI ${Geant4_LIBRARIES})
+add_executable(simEASY simEASY.cc ${sources} ${headers} ${macros})
+# target_link_libraries(simEASY ${Geant4_LIBRARIES})
 
-target_link_libraries(NaI ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
+target_link_libraries(simEASY ${Geant4_LIBRARIES} ${ROOT_LIBRARIES})
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -84,4 +84,4 @@ endforeach()
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
-install(TARGETS NaI DESTINATION bin)
+install(TARGETS simEASY DESTINATION bin)
