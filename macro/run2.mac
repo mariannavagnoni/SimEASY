@@ -5,6 +5,9 @@
 #
 #/run/numberOfWorkers 4
 /run/initialize
+
+/analysis/setFileName test
+
 #
 # Default kinemtics: 
 # electron 50 MeV in direction (0.,0.,1.)

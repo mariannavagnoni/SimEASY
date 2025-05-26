@@ -35,7 +35,6 @@
 #include "G4UIcmdWithAString.hh"
 #include "G4Run.hh"
 #include "globals.hh"
-//incluso ora
 #include "PrimaryGeneratorAction.hh"
 
 class G4Run;
@@ -64,7 +63,7 @@ private:
     G4double m_numEvents;
     //G4String m_fileName="test_6NaI_14.5cm_10MeV";
     //G4String m_fileName="test_6NaI_15cm_10949keV";
-    G4String m_fileName="test_6NaI_15cm_11329keV_nndc";
+    G4String m_fileName;
     G4UIcmdWithAString *m_cmdSetFileName = nullptr;
 };
 

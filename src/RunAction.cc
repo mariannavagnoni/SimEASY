@@ -37,7 +37,16 @@
 
 RunAction::RunAction()
 {
-  G4cout << ">>> RunAction constructed" << G4endl;
+  //initialize the analysis manager
+  auto analysisManager = G4AnalysisManager::Instance();
+  analysisManager->SetDefaultFileType("root");
+
+  // Default settings
+  // Set to false to see .root files from individual threads
+  // Note: merging ntuples is available only with Root output
+  analysisManager->SetNtupleMerging(true); 
+  analysisManager->SetFileName("defaultName");
+
 }
 
 RunAction::~RunAction()
@@ -45,38 +54,34 @@ RunAction::~RunAction()
 
 void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
 
-    //initialize the analysis manager
-    G4VAnalysisManager *analysisManager = G4ToolsAnalysisManager::Instance();
-
-    G4cout << ">>> RunAction::BeginOfRunAction called <<<" << G4endl;
+    auto analysisManager = G4AnalysisManager::Instance();
 
     //get the ID to distinguish between each run (useful for macros)
-    G4int runID = run->GetRunID()+1;
-    std::stringstream strRunID;
-    strRunID << runID;
+    //G4int runID = run->GetRunID()+1;
+    //std::stringstream strRunID;
+    //strRunID << runID;
+    //std::stringstream evt ;
+    //evt << m_numEvents;
 
-    std::stringstream evt ;
-    evt << m_numEvents;
-
-    //Open qa file
+    //Open a file
     if (analysisManager) {
-
-    //analysisManager->OpenFile(m_fileName + evt.str()+".root");
-
-    analysisManager->OpenFile(m_fileName + strRunID.str()+".root");
-
-    } else {
-        G4cerr << "Error: analysisManager is null in EndOfRunAction!" << G4endl;
+      //analysisManager->OpenFile(m_fileName + evt.str()+".root");
+      //analysisManager->OpenFile(m_fileName + strRunID.str()+".root");
+      analysisManager->OpenFile();
+    } 
+    else {
+      G4cerr << "Error: analysisManager is null in BeginOfRunAction!" << G4endl;
     }
-    if(analysisManager->IsOpenFile())
-    {
-        G4cout << "File opened successfully!" << std::endl;
-    } else {
-        G4cerr << "Error: Failed to open the file!" << G4endl;
+    
+    if(analysisManager->IsOpenFile()) {
+        G4cout << "Analysis root file opened successfully!" << std::endl;
+    } 
+    else {
+        G4cerr << "Error: Failed to open the analysis root file!" << G4endl;
     }
 
+    analysisManager->CreateH1("Tot_energy","Energy deposit",1400,0.*MeV,14*MeV); //
 
-        analysisManager->CreateH1("Tot_energy","Energy deposit",1400,0.*MeV,14*MeV); //
     for (G4int i = 1; i < 8; i++) {
         // Constructing the title dynamically
         G4String name = "Edeposit_" + std::to_string(i);
@@ -85,56 +90,50 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
         // Create the histogram with the dynamically constructed title
         analysisManager->CreateH1(name, title, 1400, 0.*MeV, 14.*MeV);
     }
-    analysisManager->CreateH1("Sum_individuals","Sum energy deposit",1400,0.*MeV,14*MeV);
 
+    analysisManager->CreateH1("Sum_individuals","Sum energy deposit",1400,0.*MeV,14*MeV);
 
     //h1 - energy deposited
 
-        //Ntuple to store Primary Gamma
-        analysisManager->CreateNtuple("Primary", "Primary");
-        //create coloumn
-        analysisManager->CreateNtupleIColumn("ID");
-        analysisManager->CreateNtupleDColumn("E");
-        analysisManager->CreateNtupleDColumn("x");
-        analysisManager->CreateNtupleDColumn("y");
-        analysisManager->CreateNtupleDColumn("z");
-        analysisManager->CreateNtupleDColumn("phi");
-        analysisManager->CreateNtupleDColumn("cosTheta");
+    //Ntuple to store Primary Gamma
+    analysisManager->CreateNtuple("Primary", "Primary");
+    //create column
+    analysisManager->CreateNtupleIColumn("ID");
+    analysisManager->CreateNtupleDColumn("E");
+    analysisManager->CreateNtupleDColumn("x");
+    analysisManager->CreateNtupleDColumn("y");
+    analysisManager->CreateNtupleDColumn("z");
+    analysisManager->CreateNtupleDColumn("phi");
+    analysisManager->CreateNtupleDColumn("cosTheta");
 
-        analysisManager->FinishNtuple(0);
+    analysisManager->FinishNtuple(0);
 
+    //Ntuple to store the deposited energy
+    analysisManager->CreateNtuple("Edep", "Edep");
+    //create Column
+    analysisManager->CreateNtupleIColumn("ID");
+    analysisManager->CreateNtupleDColumn("Edep");
+    //analysisManager->CreateNtupleIColumn("detectorID");
+    analysisManager->CreateNtupleDColumn("E");
+    analysisManager->CreateNtupleDColumn("x");
+    analysisManager->CreateNtupleDColumn("y");
+    analysisManager->CreateNtupleDColumn("z");
+    analysisManager->CreateNtupleDColumn("phi");
+    analysisManager->CreateNtupleDColumn("cosTheta");
+    //analysisManager->CreateNtupleDColumn("Edep");
 
-        //Ntuple to store the deposited energy
-        analysisManager->CreateNtuple("Edep", "Edep");
-        //create Column
-        analysisManager->CreateNtupleIColumn("ID");
-        analysisManager->CreateNtupleDColumn("Edep");
-        //analysisManager->CreateNtupleIColumn("detectorID");
-        analysisManager->CreateNtupleDColumn("E");
-        analysisManager->CreateNtupleDColumn("x");
-        analysisManager->CreateNtupleDColumn("y");
-        analysisManager->CreateNtupleDColumn("z");
-        analysisManager->CreateNtupleDColumn("phi");
-        analysisManager->CreateNtupleDColumn("cosTheta");
-        //analysisManager->CreateNtupleDColumn("Edep");
-
-        analysisManager->FinishNtuple(1);
-
-
-
+    analysisManager->FinishNtuple(1);
 }
 
 void RunAction::EndOfRunAction(const G4Run* run){
-
-
     G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
     analysisManager->Write();
     analysisManager->CloseFile();
-
 }
 
-
 void RunAction::SetNewValue (G4UIcommand *command, G4String newValue) {
+  // Filename can be set in the macro: /analysis/setFileName file_name
+  // So this function may not be needed...
     if (command == m_cmdSetFileName) {
         m_fileName = newValue;
     }
@@ -145,5 +144,4 @@ void RunAction::SetNewValue (G4UIcommand *command, G4String newValue) {
 
 void RunAction::SetNumberOfEvents(G4double numEvents){
     m_numEvents = numEvents;
-
 }
