@@ -1,7 +1,0 @@
-/Users/mariannavagnoni/University/PhD/Simulations/SimEASY/build/CMakeFiles/NaI.dir
-/Users/mariannavagnoni/University/PhD/Simulations/SimEASY/build/CMakeFiles/edit_cache.dir
-/Users/mariannavagnoni/University/PhD/Simulations/SimEASY/build/CMakeFiles/rebuild_cache.dir
-/Users/mariannavagnoni/University/PhD/Simulations/SimEASY/build/CMakeFiles/list_install_components.dir
-/Users/mariannavagnoni/University/PhD/Simulations/SimEASY/build/CMakeFiles/install.dir
-/Users/mariannavagnoni/University/PhD/Simulations/SimEASY/build/CMakeFiles/install/local.dir
-/Users/mariannavagnoni/University/PhD/Simulations/SimEASY/build/CMakeFiles/install/strip.dir
