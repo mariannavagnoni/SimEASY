@@ -42,8 +42,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, public G4UI
         void GeneratePrimaries(G4Event* );
         void GeneratePrimaryGamma(G4int, G4ThreeVector, G4double Eg, G4Event*);
 
-        //void GeneratePrimaryGamma(G4ThreeVector, G4Event*);
-        void GenerateSecondaryGamma(unsigned long j,  G4ThreeVector, G4double Eg, G4Event*);
+        //void GenerateSecondaryGamma(unsigned long j,  G4ThreeVector, G4double Eg, G4Event*);
         const G4double* getDaughterEnergy() const {return Ed;}
 
     private:
@@ -52,6 +51,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, public G4UI
         G4double m_radius = 1.1; //*CLHEP::cm;
         G4ThreeVector p1;
         levelvec* levels; 
+        G4double firstExcitedEnergy;
         DataBin* databin;
         G4double* Ed;
         //G4ParticleDefinition *m_gammaDefinition = nullptr;

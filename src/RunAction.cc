@@ -73,12 +73,15 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
       G4cerr << "Error: analysisManager is null in BeginOfRunAction!" << G4endl;
     }
     
+    // This evaluates to false after the first time the file is opened in a run
+    /*
     if(analysisManager->IsOpenFile()) {
-        G4cout << "Analysis root file opened successfully!" << std::endl;
+        G4cout << "Analysis root file opened successfully!" << G4endl;
     } 
     else {
         G4cerr << "Error: Failed to open the analysis root file!" << G4endl;
     }
+    */
 
     analysisManager->CreateH1("Tot_energy","Energy deposit",1400,0.*MeV,14*MeV); //
 
