@@ -134,7 +134,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
     std::vector<G4int> values; // vector of rounded-up branching ratios for this level
 
-    // Loop through all the levels
+    // Loop through the levels for a cascade 
     while( stateIndex < numLevels )
     {
         // Reset variables 

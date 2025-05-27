@@ -17,25 +17,17 @@
 #include <sstream>
 #include "readlevels.hh"
 
-using namespace std;
-
-
-int readlevels(G4String filename, levelvec* levels, DataBin* databin){
-    
-    
+int readlevels(G4String filename, levelvec* levels, DataBin* databin){    
     //ifstream file("/Users/danielamercogliano/Desktop/tools/geant4/geant4-v10.7.4/examples/Shades_MC_Easy/26Mg_v1.txt");
     ifstream file(filename.c_str());
     
     if(!file) {
-        
-        std::cout << "The file does not exist"<<std::endl;
-        
+        G4cout << "The levels file does not exist" << G4endl;
         return 1;
     }
     
-    
     if (!file.is_open()) {
-        std::cerr << "Failed to open the file." << std::endl;
+        G4cerr << "Failed to open the levels file." << G4endl;
         return 2;
     }
     
@@ -50,14 +42,10 @@ int readlevels(G4String filename, levelvec* levels, DataBin* databin){
     G4double energy;
     
     if(file.is_open()){
-        
-        
         while(getline(file, line)){
             //skip empty lines
             if (line.empty()){
-                
                 continue;
-                
             }
             
             //Process the first line (State Energy)
@@ -65,62 +53,38 @@ int readlevels(G4String filename, levelvec* levels, DataBin* databin){
             ss1 >> firstWord >> secondWord;
             energy = atof(secondWord.c_str());
             
-        
             getline(file,line);
             if (line.empty()){
-                
                 continue;
-                
             }
             //Process the second line (gamma energy)
             std::stringstream ss2(line);
                 
             while(ss2 >> word){
-                
+
                 daughter.push_back(atof(word.c_str()));
                 gamma.push_back((energy - atof(word.c_str())));
     
-                    //gamma.push_back(atof(word.c_str())*CLHEP::keV);
-                    //daughter.push_back((energy - atof(word.c_str()))*CLHEP::keV);
-                }
+                //gamma.push_back(atof(word.c_str())*CLHEP::keV);
+                //daughter.push_back((energy - atof(word.c_str()))*CLHEP::keV);
+            }
             
             ss1.clear();
             ss2.clear();
                 
             getline(file,line);
             if (line.empty()){
-                
                 continue;
-                
             }
             //get the third line
             std::stringstream ss3(line);
                 
             while(ss3 >> word){
-                    
-                    br.push_back(atof(word.c_str()));
-                
-                }
-            
+                br.push_back(atof(word.c_str()));
+            }
             
             ss3.clear();
-            
-            //Print the data as check
-            /*
-            std::cout << "Energy: " << energy << std::endl;
-            for (const auto &d : daughter) {
-                        std::cout << "Daughter: " << d << std::endl;
-                    }
-            for (const auto &b : br) {
-                        std::cout << "Branching Ratio: " << b << std::endl;
-               
-            
-        }
-             */
-            
-            
-            
-            
+
             double probability[br.size()];
             double gammas[gamma.size()];
             double daughters[daughter.size()];
@@ -138,7 +102,6 @@ int readlevels(G4String filename, levelvec* levels, DataBin* databin){
             }
             
             for(unsigned long j=0 ; j < br.size() ; j++)
-            
             {
                 probability[j] = 100*prob[j]/somma;
             }
@@ -153,51 +116,40 @@ int readlevels(G4String filename, levelvec* levels, DataBin* databin){
         }
         
         file.close();
-    
-        
     }
     
     //Ground state
     levels->push_back(*(new Level(0* CLHEP::MeV)));
     
     //Check
-    
-    cout <<"Number of total Levels" << levels->size() << endl;
-    
-    std::cout << "---------------" << std::endl;
+    G4cout << "Number of total Levels " << levels->size() << G4endl;
+    G4cout << "---------------" << G4endl;
+
     string reply;
-    
-    G4cout << "Do you want to display the Energy levels of 26Mg? Type y/n" << std::endl;
+    G4cout << "Do you want to display the Energy levels of 26Mg? Type y/n" << G4endl;
     cin >> reply;
-    
     
     for(unsigned long i = 0; i < levels->size(); i++)
     {
-        
         const G4double *daughterss = levels->at(i).getDaughter();
         int numDaughters = levels->at(i).getSize();
         const G4double *probss = levels->at(i).getBranching();
-       
         
         if(reply=="y"){
-            
-            cout << "Level " << i + 1 << ":" << std::endl;
-            cout << "Energy: " << levels->at(i).getEnergy() << " keV" << std::endl;
-            cout << "Daughter: ";
+            G4cout << "Level " << i + 1 << ":" << G4endl;
+            G4cout << "Energy: " << levels->at(i).getEnergy() << " keV" << G4endl;
+            G4cout << "Daughter: ";
             
             for (int j = 0; j < numDaughters; j++) {
-                cout << daughterss[j] << " keV ";
+                G4cout << daughterss[j] << " keV ";
             }
-            cout << std::endl;
+            G4cout << G4endl;
             
-            
-            
-            cout << "Branching ratio " ;
+            G4cout << "Branching ratio " ;
             for (int j = 0; j < numDaughters; j++) {
-                
-                cout << probss[j] << " % ";
+                G4cout << probss[j] << " % ";
             }
-            cout << std::endl;
+            G4cout << G4endl;
         }
         
         if(reply=="n"){

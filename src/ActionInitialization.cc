@@ -47,13 +47,6 @@ ActionInitialization::~ActionInitialization(){}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-
-    ////////////////
-    //
-    // Work needed to get MT running: Need separate RunAction for master (BuildForMaster) and worker (Build)
-    //
-    ///////////
-
 void ActionInitialization::BuildForMaster() const
 {
   SetUserAction(new RunAction);
@@ -63,7 +56,6 @@ void ActionInitialization::BuildForMaster() const
 
 void ActionInitialization::Build() const
 {
-  G4cout << ">>> ActionInitialization::Build called" << G4endl;
   SetUserAction(new PrimaryGeneratorAction(levels, databin));
   SetUserAction(new RunAction);
   SetUserAction(new EventAction);
