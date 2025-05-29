@@ -23,6 +23,6 @@ $ make (-j4)
 
 ## Running the code
 Once built, the simulation can be run in visualisation mode from the build directory as:
-` $ ./SimEASY nomac "levels_file" #threads `
+` $ ./simEASY nomac "levels_file" #threads `
 or in batch mode as:
-` $ ./SimEASY "run_macro" "levels_file" #threads `
+` $ ./simEASY "run_macro" "levels_file" #threads `
