@@ -68,6 +68,7 @@ set(EXAMPLEB4D_SCRIPTS
   /macro/init_vis.mac
   /file.C/plotHisto.C
   /file.C/plotNtuple.C
+  /file.C/read_bkg_us.cpp
   /macro/run1.mac
   /macro/run2.mac
   /macro/vis2.mac
