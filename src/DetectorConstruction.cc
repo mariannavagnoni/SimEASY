@@ -105,7 +105,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     auto elNe22 = new G4Element("Neon_22","Ne22", 10, Ne22_atomicMass);
 
     const auto R = 8.205736608e+1*cm3*atmosphere/(kelvin*mole);
-    const auto Ne22gas_pressure = 3e-3*atmosphere;
+    const auto Ne22gas_pressure = 3e-3*atmosphere; // 1 atm = 1.01325 bar
     const auto Ne22gas_temperature = 293*kelvin;
     const auto Ne22gas_density = Ne22_atomicMass*Ne22gas_pressure/(R*Ne22gas_temperature);
 
@@ -200,7 +200,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 	scintLogic->SetVisAttributes(scintVisAtt);
 
     G4int imax=6;
-    double r = 14.5*CLHEP::cm; //nel file cad aumentiamo di 1 mm
+    double r = 15*CLHEP::cm; //nel file cad aumentiamo di 1 mm
 
     G4ThreeVector pos_in = G4ThreeVector(0, 0, 0.*CLHEP::mm);
     G4ThreeVector pos_scint = G4ThreeVector(0, 0, 0.*CLHEP::mm - 23.8*CLHEP::mm);
@@ -212,11 +212,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     double theta=1*(360./imax)*CLHEP::degree;
 
     G4RotationMatrix *rot=new G4RotationMatrix();
-    rot->rotateZ(-1*theta);
 
     G4ThreeVector pos_out = G4ThreeVector(r*cos(theta), r*sin(theta), 0.*CLHEP::mm);
-
-    G4PVPlacement* Al_enclosure = new G4PVPlacement(rot, pos_out, enclosure, "Outer Box Logic", worldLogic, false, 1, checkOverlaps);
 
     for(int i=1; i<=imax; i++){
         double theta=i*(360./imax)*CLHEP::degree;
