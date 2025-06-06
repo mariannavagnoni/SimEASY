@@ -21,6 +21,7 @@
 #include "G4RandomDirection.hh"
 #include "Randomize.hh"
 #include "CLHEP/Random/RandGeneral.h"
+#include "UserEventInformation.hh"
 
 //---------------------
 #include "DataBin.hh"
@@ -41,7 +42,7 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction, public G4UI
 
         void GeneratePrimaries(G4Event* );
         void GeneratePrimaryGamma(G4int, G4ThreeVector, G4double Eg, G4Event*);
-        void GenerateGamma(G4int, G4ThreeVector, G4double Eg, G4Event*);
+        void GenerateGamma(G4int, G4ThreeVector, G4double Eg, G4Event*, UserEventInformation*);
 
         //void GenerateSecondaryGamma(unsigned long j,  G4ThreeVector, G4double Eg, G4Event*);
         const G4double* getDaughterEnergy() const {return Ed;}

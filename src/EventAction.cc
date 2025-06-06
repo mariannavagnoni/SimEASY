@@ -67,27 +67,41 @@ void EventAction::BeginOfEventAction(const G4Event*  /*event*/){}
 void EventAction::EndOfEventAction(const G4Event* event)
 {
     // This is the energy, position, and direction information of the emitted gamma-rays from the 26Mg cascade, as filled in PrimaryGeneratorAction
-    auto userInformation = static_cast<UserEventInformation*>(event->GetUserInformation());
-    
-    const double E        = userInformation->GetE();
-    const double posX     = userInformation->GetPosition().x();
-    const double posY     = userInformation->GetPosition().y();
-    const double posZ     = userInformation->GetPosition().z();
-    
-    const double phi      = userInformation->GetPhi();
-    const double cosTheta = userInformation->GetCosTheta();
-    
-    
+
     G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
-    
-    analysisManager->FillNtupleIColumn(0, 0, event->GetEventID());
-    analysisManager->FillNtupleDColumn(0, 1, E / MeV);
-    analysisManager->FillNtupleDColumn(0, 2, posX / m);
-    analysisManager->FillNtupleDColumn(0, 3, posY / m);
-    analysisManager->FillNtupleDColumn(0, 4, posZ / m);
-    analysisManager->FillNtupleDColumn(0, 5, phi);
-    analysisManager->FillNtupleDColumn(0, 6, cosTheta);
-    analysisManager->AddNtupleRow(0);
+
+    auto* info = dynamic_cast<UserEventInformation*>(event->GetUserInformation());
+
+    double E;
+    double posX;
+    double posY;
+    double posZ;
+    double phi;
+    double cosTheta;
+    int id;
+
+    for(const auto& particle : info->GetParticles()){
+
+        E        = particle.energy;
+        posX     = particle.position.x();
+        posY     = particle.position.y();
+        posZ     = particle.position.z();
+
+        phi      = particle.direction.phi();
+        cosTheta = particle.direction.cosTheta();
+
+        id = particle.id;
+
+        analysisManager->FillNtupleIColumn(0, 0, id);
+        analysisManager->FillNtupleDColumn(0, 1, E / MeV);
+        analysisManager->FillNtupleDColumn(0, 2, posX / m);
+        analysisManager->FillNtupleDColumn(0, 3, posY / m);
+        analysisManager->FillNtupleDColumn(0, 4, posZ / m);
+        analysisManager->FillNtupleDColumn(0, 5, phi);
+        analysisManager->FillNtupleDColumn(0, 6, cosTheta);
+        analysisManager->AddNtupleRow(0);
+
+    }
     
     //std::vector<G4double*> energy;
     G4double energy[8] = {0};
