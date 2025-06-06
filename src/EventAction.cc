@@ -66,6 +66,7 @@ void EventAction::BeginOfEventAction(const G4Event*  /*event*/){}
     
 void EventAction::EndOfEventAction(const G4Event* event)
 {
+    // This is the energy, position, and direction information of the emitted gamma-rays from the 26Mg cascade, as filled in PrimaryGeneratorAction
     auto userInformation = static_cast<UserEventInformation*>(event->GetUserInformation());
     
     const double E        = userInformation->GetE();
@@ -99,7 +100,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
     {
         G4SDManager* sdm = G4SDManager::GetSDMpointer();
         
-        
         if (sdm->FindSensitiveDetector("scintDet") == nullptr)
         {
             G4cout << "ERROR: Did not find sensitive detector scintDet" << G4endl;
@@ -107,8 +107,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
         }
         else
         {
-            m_HCID
-            = sdm->GetCollectionID("scintDet/Edep");
+            m_HCID = sdm->GetCollectionID("scintDet/Edep");
         }
     }
     if (m_HCID >= 0)
@@ -118,18 +117,13 @@ void EventAction::EndOfEventAction(const G4Event* event)
         //G4cout << "_____________" << std::endl;
         //G4cout << "Hit Collection ID "<< m_HCID << std::endl;
         
-        
         if(HCE)
         {
             hitsColl = static_cast<MyHitsCollection*>(HCE->GetHC(m_HCID));
             
-            
             if(hitsColl)
             {
-                
-                
                 numberHits=hitsColl->entries();
-            
                 
                 for(G4int j=0;j<numberHits; j++)
                 {
@@ -137,14 +131,12 @@ void EventAction::EndOfEventAction(const G4Event* event)
                     G4double de = hit->GetEdep();
                     Energy_tot += de;
                     energy[hit->GetID()] += de;
-                    
                 }
                 
                 for(G4int i=1; i < 8; i++)
                     if(energy[i]>0) analysisManager->FillH1(i, energy[i] / MeV); //Fill value as MeV
                 
                 if(Energy_tot>0){
-                    
                     analysisManager->FillH1(0, Energy_tot / MeV); //Fill value as MeV
                     // Fill energy deposition
                     analysisManager->FillNtupleIColumn(1, 0, event->GetEventID());
@@ -158,7 +150,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
                     analysisManager->FillNtupleDColumn(1, 7, cosTheta);
                     //analysisManager->FillNtupleDColumn(1, 8, Energy_tot);
                     analysisManager->AddNtupleRow(1);
-                    
                 }
                 
                 G4double sum=0;
@@ -172,41 +163,18 @@ void EventAction::EndOfEventAction(const G4Event* event)
                 //G4cout << "number of step " << numberHits << std::endl;
                 //G4cout << "number of step with total 0 deposited energy" << count << std::endl;
             }
-        else
+            else
             {
-                G4cout << "hitsColl does not exist" << std::endl;
-                
+                G4cout << "hitsColl does not exist" << std::endl;   
             }
             
-            
-            
-            
-           
-                
-                //for(G4int i=0; i<7; i++)
-                /*
-                 Energy vector<double>
-                 
-                 
-                 G4int i = 0:
-                 vector<int> vec = {1,2,3,4,5} //energia
-                 
-                 for(auto itr : vec){
-                 histograms[i]->Fill(itr);
-                 i++;
-                 }
-                 */
-                
-                // getchar();
-            }
-        else
-            {
-                
-                G4cout << "HCE does not exist" << std::endl;
-            }
-            
-           
         }
+        else
+        {        
+            G4cout << "HCE does not exist" << std::endl;
+        }
+                   
+    }
         
 }
 

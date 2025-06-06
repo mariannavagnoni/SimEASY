@@ -69,7 +69,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     // It is not the raw branching given in the input file
     ///////
 
-    G4bool diagnostics = true; // Enable outputs to terminal 
+    G4bool diagnostics = false; // Enable outputs to terminal 
 
     //branching normalization
     G4double branchSum = 0; // branching sum
@@ -233,7 +233,8 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
         G4int primaryID = GenerateUniqueID(); 
         if(diagnostics) G4cout << "primaryID = " << primaryID << G4endl;
-        GeneratePrimaryGamma(primaryID, particlePosition, gammaEnergy,  anEvent);
+        //GeneratePrimaryGamma(primaryID, particlePosition, gammaEnergy,  anEvent);
+        GenerateGamma(primaryID, particlePosition, gammaEnergy,  anEvent);
         
         //condizione per la generazione del gamma secondario
         // Increment stateIndex until we reach the daughter state corresponding to daughterEnergy
@@ -282,6 +283,8 @@ void PrimaryGeneratorAction::GeneratePrimaryGamma(G4int ID,  G4ThreeVector posit
     particleGun->SetParticleEnergy(Energy*CLHEP::keV);
     particleGun->SetParticleMomentumDirection(G4RandomDirection());
 
+    G4cout << "Primary gamma energy = " << Energy*CLHEP::keV << " keV" << G4endl;
+
     //Generate Primary Vertex
     particleGun->GeneratePrimaryVertex(Event);
 
@@ -294,10 +297,37 @@ void PrimaryGeneratorAction::GeneratePrimaryGamma(G4int ID,  G4ThreeVector posit
     // G4cout << "number of particles " << nPrimaries << G4endl;
 
     const auto primaryParticle = primaryVertex->GetPrimary();
+
+    G4cout << "Primary gamma energy saved to the root file = " << primaryParticle->GetKineticEnergy() << " keV" << G4endl;
     
     Event->SetUserInformation(new UserEventInformation(primaryParticle->GetKineticEnergy(),
                                                         primaryVertex->GetPosition(),
                                                         primaryParticle->GetMomentum()
+                                                    ));
+
+}
+
+void PrimaryGeneratorAction::GenerateGamma(G4int ID,  G4ThreeVector position, double Energy, G4Event* Event)
+{
+    //Set the vertex properties
+    particleGun->SetParticlePosition(position);
+    particleGun->SetParticleEnergy(Energy*CLHEP::keV);
+    particleGun->SetParticleMomentumDirection(G4RandomDirection());
+
+    //G4cout << "Primary gamma energy = " << Energy*CLHEP::keV << " keV" << G4endl;
+
+    //Generate Primary Vertex
+    particleGun->GeneratePrimaryVertex(Event);
+
+    //Print additional particle properties
+    //const auto particleDefinition = particleGun->GetParticleDefinition();
+    //G4cout << "Particle Definition: " << particleDefinition->GetParticleName() << G4endl;
+
+    //G4cout << "Primary gamma energy saved to the root file = " << particleGun->GetParticleEnergy() << " keV" << G4endl;
+    
+    Event->SetUserInformation(new UserEventInformation(particleGun->GetParticleEnergy(),
+                                                        particleGun->GetParticlePosition(),
+                                                        particleGun->GetParticleMomentumDirection()
                                                     ));
 
 }

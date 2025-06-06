@@ -99,7 +99,9 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
     //h1 - energy deposited
 
     //Ntuple to store Primary Gamma
-    analysisManager->CreateNtuple("Primary", "Primary");
+    //analysisManager->CreateNtuple("Primary", "Primary");
+    //Ntuple to store all emitted Gammas
+    analysisManager->CreateNtuple("Emitted", "Emitted");
     //create column
     analysisManager->CreateNtupleIColumn("ID");
     analysisManager->CreateNtupleDColumn("E");
