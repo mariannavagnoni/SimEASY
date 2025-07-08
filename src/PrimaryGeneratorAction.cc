@@ -142,7 +142,8 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     {
         // Reset variables 
         //array branching
-        prova[100] = {0};
+        //prova[100] = {0};
+        std::fill(std::begin(prova), std::end(prova), 0);
         branchIndex = 0;
         branchSum = 0;
         index = 0;
