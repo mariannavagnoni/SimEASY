@@ -104,7 +104,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
     }
     
     //std::vector<G4double*> energy;
-    G4double energy[8] = {0};
+    G4double energy[7] = {0};
     G4double Energy_tot=0.;
     G4int count = 0;
     G4int numberHits=0;
@@ -139,7 +139,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
             {
                 numberHits=hitsColl->entries();
                 
-                for(G4int j=0;j<numberHits; j++)
+                for(G4int j=0; j<numberHits; j++)
                 {
                     MyHit* hit = (*hitsColl)[j];
                     G4double de = hit->GetEdep();
@@ -147,8 +147,17 @@ void EventAction::EndOfEventAction(const G4Event* event)
                     energy[hit->GetID()] += de;
                 }
                 
-                for(G4int i=1; i < 8; i++)
-                    if(energy[i]>0) analysisManager->FillH1(i, energy[i] / MeV); //Fill value as MeV
+                G4double sum=0;
+                G4int numNaI = 0;
+                for(G4int i=1; i < 7; i++){
+                    if(energy[i]>0){ 
+                        analysisManager->FillH1(i, energy[i] / MeV); //Fill value as MeV
+                        numNaI++;
+                    }
+                    sum += energy[i];
+                }
+                if(numNaI < 2) sum = 0; // only record sum if > 1 NaI triggered in this event
+                analysisManager->FillH1(7, sum / MeV);
                 
                 if(Energy_tot>0){
                     analysisManager->FillH1(0, Energy_tot / MeV); //Fill value as MeV
@@ -156,26 +165,19 @@ void EventAction::EndOfEventAction(const G4Event* event)
                     analysisManager->FillNtupleIColumn(1, 0, event->GetEventID());
                     //detector ID Copy number
                     analysisManager->FillNtupleDColumn(1, 1, Energy_tot/MeV);
-                    analysisManager->FillNtupleDColumn(1, 2, E / MeV);
-                    analysisManager->FillNtupleDColumn(1, 3, posX / m);
-                    analysisManager->FillNtupleDColumn(1, 4, posY / m);
-                    analysisManager->FillNtupleDColumn(1, 5, posZ / m);
-                    analysisManager->FillNtupleDColumn(1, 6, phi);
-                    analysisManager->FillNtupleDColumn(1, 7, cosTheta);
-                    //analysisManager->FillNtupleDColumn(1, 8, Energy_tot);
+                    analysisManager->FillNtupleDColumn(1, 2, posX / m);
+                    analysisManager->FillNtupleDColumn(1, 3, posY / m);
+                    analysisManager->FillNtupleDColumn(1, 4, posZ / m);
+                    analysisManager->FillNtupleDColumn(1, 5, phi);
+                    analysisManager->FillNtupleDColumn(1, 6, cosTheta);
                     analysisManager->AddNtupleRow(1);
                 }
-                
-                G4double sum=0;
-                for(G4int i=1; i < 8; i++){
-                    sum+=energy[i];
-                }
-                
-                analysisManager->FillH1(8, sum / MeV);
                 
                 if(Energy_tot==0) count++;
                 //G4cout << "number of step " << numberHits << std::endl;
                 //G4cout << "number of step with total 0 deposited energy" << count << std::endl;
+                //G4cout << "energy[1] = "<<energy[1] << ", [2] = "<<energy[2]<<", [3] = "<<energy[3]<<", [4] = "<<energy[4]<<", [5] = "<<energy[5]<<", [6] = "<<energy[6] << G4endl;
+                //G4cout<<"sum = "<<sum<<", Energy_tot = "<<Energy_tot<<G4endl;
             }
             else
             {

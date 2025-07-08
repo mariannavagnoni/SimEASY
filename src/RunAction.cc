@@ -85,7 +85,7 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
 
     analysisManager->CreateH1("Tot_energy","Energy deposit",1400,0.*MeV,14*MeV); //
 
-    for (G4int i = 1; i < 8; i++) {
+    for (G4int i = 1; i < 7; i++) {
         // Constructing the title dynamically
         G4String name = "Edeposit_" + std::to_string(i);
         G4String title = "Energy deposit for scintillator " + std::to_string(i);
@@ -94,7 +94,7 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
         analysisManager->CreateH1(name, title, 1400, 0.*MeV, 14.*MeV);
     }
 
-    analysisManager->CreateH1("Sum_individuals","Sum energy deposit",1400,0.*MeV,14*MeV);
+    analysisManager->CreateH1("Summed","Sum energy deposit (# NaI triggered > 1)",1400,0.*MeV,14*MeV);
 
     //h1 - energy deposited
 
@@ -119,7 +119,6 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
     analysisManager->CreateNtupleIColumn("ID");
     analysisManager->CreateNtupleDColumn("Edep");
     //analysisManager->CreateNtupleIColumn("detectorID");
-    analysisManager->CreateNtupleDColumn("E");
     analysisManager->CreateNtupleDColumn("x");
     analysisManager->CreateNtupleDColumn("y");
     analysisManager->CreateNtupleDColumn("z");
