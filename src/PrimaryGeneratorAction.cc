@@ -113,7 +113,8 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     ////////////////////////////////////
     //
     // Set me!
-    G4int stateIndex = 5; // Ex = 11329 keV state -> Er = 830 keV in lab, 702 keV in c.m.
+    //G4int stateIndex = 5; // 26Mg_v1.txt, Ex = 11329 keV state -> Er = 830 keV in lab, 702 keV in c.m.
+    G4int stateIndex = 0; // 26Mg_830cascade.txt, Ex = 11320 keV state -> Er = 830 keV in lab, 702 keV in c.m.
     //
     ////////////////////////////////////
 
