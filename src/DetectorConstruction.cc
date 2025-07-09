@@ -78,7 +78,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     G4RotationMatrix *noRotation = nullptr;
 
 
-    G4int FirstDetectorUp = 1; // 1 - conf1, 2 - conf2, 3 - conf3
+    G4int FirstDetectorUp = 3; // 1 - conf1, 2 - conf2, 3 - conf3
     /*World volume*/
 
     // a box of air
@@ -258,7 +258,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
         G4ThreeVector pos_out = G4ThreeVector(r*cos(theta), r*sin(theta), 0.*CLHEP::mm);
 
-        for(int i=0; i<=imax; i++){
+        for(int i=1; i<=imax; i++){
             double theta=i*(360./imax)*CLHEP::degree;
             //double theta=0*CLHEP::degree;
 
@@ -299,7 +299,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         G4RotationMatrix *rot1=new G4RotationMatrix();
         rot1->rotateZ(theta1);
         G4ThreeVector pos_out1 = G4ThreeVector(r*sin(theta1), r*cos(theta1), 0.*CLHEP::mm) + G4ThreeVector(54.5*cos(theta1), -54.5*sin(theta1), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure1 = new G4PVPlacement(rot1, pos_out1, enclosure, "Outer Box Logic", worldLogic, false, 0, checkOverlaps);
+        G4PVPlacement* Al_enclosure1 = new G4PVPlacement(rot1, pos_out1, enclosure, "Outer Box Logic", worldLogic, false, 1, checkOverlaps);
         if((enclosure->GetNoDaughters())== 0){
             G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
             if((innerBoxlogic->GetNoDaughters())== 0){
@@ -317,7 +317,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         G4RotationMatrix *rot2=new G4RotationMatrix();
         rot2->rotateZ(theta2);
         G4ThreeVector pos_out2 = G4ThreeVector(r*sin(theta2), r*cos(theta2), 0.*CLHEP::mm) + G4ThreeVector(-54.5*cos(theta2), 54.5*sin(theta2), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure2 = new G4PVPlacement(rot2, pos_out2, enclosure, "Outer Box Logic", worldLogic, false, 1, checkOverlaps);
+        G4PVPlacement* Al_enclosure2 = new G4PVPlacement(rot2, pos_out2, enclosure, "Outer Box Logic", worldLogic, false, 2, checkOverlaps);
         if((enclosure->GetNoDaughters())== 0){
             G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
             if((innerBoxlogic->GetNoDaughters())== 0){
@@ -335,7 +335,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         G4RotationMatrix *rot3=new G4RotationMatrix();
         rot3->rotateZ(theta3);
         G4ThreeVector pos_out3 = G4ThreeVector(r*sin(theta3), r*cos(theta3), 0.*CLHEP::mm) + G4ThreeVector(-109*cos(theta3), 109*sin(theta3), 0.*CLHEP::mm) + G4ThreeVector(-109*sin(theta3), -109*cos(theta3), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure3 = new G4PVPlacement(rot3, pos_out3, enclosure, "Outer Box Logic", worldLogic, false, 2, checkOverlaps);
+        G4PVPlacement* Al_enclosure3 = new G4PVPlacement(rot3, pos_out3, enclosure, "Outer Box Logic", worldLogic, false, 3, checkOverlaps);
         if((enclosure->GetNoDaughters())== 0){
             G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
             if((innerBoxlogic->GetNoDaughters())== 0){
@@ -353,7 +353,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         G4RotationMatrix *rot4=new G4RotationMatrix();
         rot4->rotateZ(theta4);
         G4ThreeVector pos_out4 = G4ThreeVector(r*sin(theta4), r*cos(theta4), 0.*CLHEP::mm) + G4ThreeVector(109*cos(theta4), -109*sin(theta4), 0.*CLHEP::mm) + G4ThreeVector(-109*sin(theta3), -109*cos(theta3), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure4 = new G4PVPlacement(rot4, pos_out4, enclosure, "Outer Box Logic", worldLogic, false, 3, checkOverlaps);
+        G4PVPlacement* Al_enclosure4 = new G4PVPlacement(rot4, pos_out4, enclosure, "Outer Box Logic", worldLogic, false, 4, checkOverlaps);
         if((enclosure->GetNoDaughters())== 0){
             G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
             if((innerBoxlogic->GetNoDaughters())== 0){
@@ -371,7 +371,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         G4RotationMatrix *rot5=new G4RotationMatrix();
         rot5->rotateZ(theta5);
         G4ThreeVector pos_out5 = G4ThreeVector(r*sin(theta5), r*cos(theta5), 0.*CLHEP::mm) + G4ThreeVector(-54.5*cos(theta5), 54.5*sin(theta5), 0.*CLHEP::mm) + G4ThreeVector(-(r+(2*109*CLHEP::mm-r))*sin(theta5), -(r+(2*109*CLHEP::mm-r))*cos(theta5), 0.*CLHEP::mm); //2*109 - (120=12 cm of radius)
-        G4PVPlacement* Al_enclosure5 = new G4PVPlacement(rot5, pos_out5, enclosure, "Outer Box Logic", worldLogic, false, 4, checkOverlaps);
+        G4PVPlacement* Al_enclosure5 = new G4PVPlacement(rot5, pos_out5, enclosure, "Outer Box Logic", worldLogic, false, 5, checkOverlaps);
         if((enclosure->GetNoDaughters())== 0){
             G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
             if((innerBoxlogic->GetNoDaughters())== 0){
@@ -389,7 +389,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         G4RotationMatrix *rot6=new G4RotationMatrix();
         rot6->rotateZ(theta6);
         G4ThreeVector pos_out6 = G4ThreeVector(r*sin(theta6), r*cos(theta6), 0.*CLHEP::mm) + G4ThreeVector(54.5*cos(theta6), -54.5*sin(theta6), 0.*CLHEP::mm) + G4ThreeVector(-(r+(2*109*CLHEP::mm-r))*sin(theta6), -(r+(2*109*CLHEP::mm-r))*cos(theta6), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure6 = new G4PVPlacement(rot6, pos_out6, enclosure, "Outer Box Logic", worldLogic, false, 5, checkOverlaps);
+        G4PVPlacement* Al_enclosure6 = new G4PVPlacement(rot6, pos_out6, enclosure, "Outer Box Logic", worldLogic, false, 6, checkOverlaps);
         if((enclosure->GetNoDaughters())== 0){
             G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
             if((innerBoxlogic->GetNoDaughters())== 0){
