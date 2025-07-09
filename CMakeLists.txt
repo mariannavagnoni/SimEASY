@@ -66,9 +66,9 @@ set(EXAMPLEB4D_SCRIPTS
   /in_out/exampleB4.in
   /macro/gui.mac
   /macro/init_vis.mac
-  /file.C/plotHisto.C
-  /file.C/plotNtuple.C
-  /file.C/read_bkg_us.cpp
+  /Cfile/plotHisto.C
+  /Cfile/plotNtuple.C
+  /Cfile/read_bkg_us.cpp
   /macro/run1.mac
   /macro/run2.mac
   /macro/vis2.mac
