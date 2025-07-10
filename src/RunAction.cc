@@ -83,7 +83,7 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
     }
     */
 
-    analysisManager->CreateH1("Tot_energy","Energy deposit",1400,0.*MeV,14*MeV); //
+    analysisManager->CreateH1("Tot_energy","Energy deposit treating all scintillators as one crystal",1400,0.*MeV,14*MeV); //
 
     for (G4int i = 1; i < 7; i++) {
         // Constructing the title dynamically
@@ -94,12 +94,6 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
         analysisManager->CreateH1(name, title, 1400, 0.*MeV, 14.*MeV);
     }
 
-    //analysisManager->CreateH1("Summed","Sum energy deposit (# NaI triggered > 1)",1400,0.*MeV,14*MeV);
-
-    //h1 - energy deposited
-
-    //Ntuple to store Primary Gamma
-    //analysisManager->CreateNtuple("Primary", "Primary");
     //Ntuple to store all emitted Gammas
     analysisManager->CreateNtuple("Emitted", "Emitted");
     //create column
@@ -127,6 +121,14 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
     analysisManager->CreateNtupleDColumn("Tdep");
 
     analysisManager->FinishNtuple(1);
+
+    //Ntuple to store the deposited energy in all crystals (summed)
+    analysisManager->CreateNtuple("ENaISum", "ENaISum");
+    //create Columns
+    analysisManager->CreateNtupleIColumn("evtID");
+    analysisManager->CreateNtupleDColumn("Edep");
+
+    analysisManager->FinishNtuple(2);
 }
 
 void RunAction::EndOfRunAction(const G4Run* run){

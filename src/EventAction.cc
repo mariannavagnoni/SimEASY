@@ -150,8 +150,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
                     if(maxTime[hit->GetID()] < time) maxTime[hit->GetID()] = time;
                 }
                 
-                G4double sum=0;
-                G4int numNaI = 0;
                 for(G4int i=1; i < 7; i++){ // Loop over # NaI and fill the branch + histograms
                     if(energy[i]>0){ 
                         analysisManager->FillNtupleIColumn(1, 0, event->GetEventID());
@@ -167,28 +165,17 @@ void EventAction::EndOfEventAction(const G4Event* event)
                         analysisManager->AddNtupleRow(1);
 
                         analysisManager->FillH1(i, energy[i] / MeV); //Fill value as MeV
-                        numNaI++;
                     }
-                    sum += energy[i];
                 }
-
-                //if(numNaI < 2) sum = 0; // only record sum if > 1 NaI triggered in this event
-                //analysisManager->FillH1(7, sum / MeV);
                 
+                if(Energy_tot > 0){ 
+                    analysisManager->FillNtupleIColumn(2, 0, event->GetEventID());
+                    analysisManager->FillNtupleDColumn(2, 1, Energy_tot / MeV);
+                
+                    analysisManager->AddNtupleRow(2);
+                }
                 if(Energy_tot>0){
-                    analysisManager->FillH1(0, Energy_tot / MeV); //Fill value as MeV
-                    // Fill energy deposition
-                    /*
-                    analysisManager->FillNtupleIColumn(1, 0, event->GetEventID());
-                    analysisManager->FillNtupleDColumn(1, 1, Energy_tot/MeV);
-                    analysisManager->FillNtupleDColumn(1, 2, posX / m);
-                    analysisManager->FillNtupleDColumn(1, 3, posY / m);
-                    analysisManager->FillNtupleDColumn(1, 4, posZ / m);
-                    analysisManager->FillNtupleDColumn(1, 5, phi);
-                    analysisManager->FillNtupleDColumn(1, 6, cosTheta);
-
-                    analysisManager->AddNtupleRow(1);
-                    */
+                    analysisManager->FillH1(0, Energy_tot / MeV); //Fill value as MeV, summed energy of all NaI (treats all NaI as single crystal)
                 }
                 
                 if(Energy_tot==0) count++;
