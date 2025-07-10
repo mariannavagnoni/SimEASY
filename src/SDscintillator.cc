@@ -60,10 +60,13 @@ G4bool MySensitiveDetector::ProcessHits(G4Step *step, G4TouchableHistory *ROhist
     MyHit* hit = new MyHit();
     // Get some properties from G4Step and set them to the hit
     G4double energyDeposit = step->GetTotalEnergyDeposit();
+    G4double timeDeposit = step->GetPreStepPoint()->GetGlobalTime();
     
-    //G4cout << "Edep" << energyDeposit / CLHEP::keV << std::endl;
+    //G4cout << "Edep " << energyDeposit / CLHEP::keV <<"keV, time " << timeDeposit / CHLEP::ns << " ns" << std::endl;
     hit->SetEdep(energyDeposit);
+    hit->SetTime(timeDeposit);
     hit->SetID(grandMotherCopyNo);
+
     hitsCollection->insert(hit);
     
 

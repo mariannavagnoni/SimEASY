@@ -94,7 +94,7 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
         analysisManager->CreateH1(name, title, 1400, 0.*MeV, 14.*MeV);
     }
 
-    analysisManager->CreateH1("Summed","Sum energy deposit (# NaI triggered > 1)",1400,0.*MeV,14*MeV);
+    //analysisManager->CreateH1("Summed","Sum energy deposit (# NaI triggered > 1)",1400,0.*MeV,14*MeV);
 
     //h1 - energy deposited
 
@@ -103,7 +103,7 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
     //Ntuple to store all emitted Gammas
     analysisManager->CreateNtuple("Emitted", "Emitted");
     //create column
-    analysisManager->CreateNtupleIColumn("ID");
+    analysisManager->CreateNtupleIColumn("evtID");
     analysisManager->CreateNtupleDColumn("E");
     analysisManager->CreateNtupleDColumn("x");
     analysisManager->CreateNtupleDColumn("y");
@@ -114,17 +114,17 @@ void RunAction::BeginOfRunAction(const G4Run* run){ //, G4double m_numEvents){
     analysisManager->FinishNtuple(0);
 
     //Ntuple to store the deposited energy
-    analysisManager->CreateNtuple("Edep", "Edep");
-    //create Column
-    analysisManager->CreateNtupleIColumn("ID");
+    analysisManager->CreateNtuple("ENaI", "ENaI");
+    //create Columns
+    analysisManager->CreateNtupleIColumn("evtID");
     analysisManager->CreateNtupleDColumn("Edep");
-    //analysisManager->CreateNtupleIColumn("detectorID");
     analysisManager->CreateNtupleDColumn("x");
     analysisManager->CreateNtupleDColumn("y");
     analysisManager->CreateNtupleDColumn("z");
     analysisManager->CreateNtupleDColumn("phi");
     analysisManager->CreateNtupleDColumn("cosTheta");
-    //analysisManager->CreateNtupleDColumn("Edep");
+    analysisManager->CreateNtupleIColumn("detID");
+    analysisManager->CreateNtupleDColumn("Tdep");
 
     analysisManager->FinishNtuple(1);
 }

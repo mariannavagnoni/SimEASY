@@ -21,15 +21,18 @@ public:
     
     //Set method
     inline void SetEdep(G4double energy){energyDeposit = energy;}
+    inline void SetTime(G4double time){timeDeposit = time;}
     G4double GetTrackLength() const;
     inline void SetID(G4int cN){ID = cN;}
    
     //Get method
     inline G4double GetEdep(){return energyDeposit;}
+    inline G4double GetTime(){return timeDeposit;}
     inline G4int GetID(){return ID;}
       
   private:
-    G4double energyDeposit;//energy deposited in the sensitive volume
+    G4double energyDeposit;// energy deposited in the sensitive volume
+    G4double timeDeposit;// time the energy is deposited in the sensitive volume 
     G4int ID;//ID of the detector
     
     G4double fTrackLength; ///< Track length in the  sensitive volume
