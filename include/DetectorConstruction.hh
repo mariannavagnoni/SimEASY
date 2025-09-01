@@ -6,8 +6,19 @@
 #include "G4UIcmdWithAString.hh"
 #include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4VUserDetectorConstruction.hh"
-
-
+#include "G4SystemOfUnits.hh"
+#include "G4NistManager.hh"
+#include "G4VisAttributes.hh"
+#include "G4Colour.hh"
+#include "G4PVPlacement.hh"
+#include "G4SubtractionSolid.hh"
+#include "G4Tubs.hh"
+#include "G4ThreeVector.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4Box.hh"
+#include "G4LogicalVolume.hh"
+#include "G4VPhysicalVolume.hh"
+#include "G4SDManager.hh"
 
 #include <memory>
 
@@ -37,6 +48,9 @@ private:
     G4double m_cylinderRin  = 0;
     G4double m_cylinderRout = 0;
     G4double m_cylinderLength = 0;
+
+    G4double fWorldSize;
+    G4LogicalVolume* logicCrystal;
 };
 
 #endif
