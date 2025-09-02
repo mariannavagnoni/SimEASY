@@ -258,8 +258,10 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         auto gasMat = new G4Material("Ne22_gas", Ne22gas_density, 1, kStateGas, Ne22gas_temperature, Ne22gas_pressure);
         gasMat->AddElement(elNe22, 100.*perCent);
 
-        auto gasSTL   = CADMesh::TessellatedMesh::FromSTL(STLpath + "G4_22Ne_gas.stl");
-        auto gasLogic = new G4LogicalVolume(gasSTL->GetSolid(), gasMat, gasName);
+        //auto gasSTL   = CADMesh::TessellatedMesh::FromSTL(STLpath + "G4_22Ne_gas.stl"); // This looks to be a hollow cylinder! Recommend a simple G4Tubs
+        //auto gasLogic = new G4LogicalVolume(gasSTL->GetSolid(), gasMat, gasName);
+        auto gasSolid = new G4Tubs("gasSolid",0.0*mm, (25.2/2.)*mm, (220.0/2.)*mm, 0.0*deg, 360.0*deg); // inner diameter of target chamber = 25.4mm
+        auto gasLogic = new G4LogicalVolume(gasSolid, gasMat, gasName);
 
         gasLogic->SetVisAttributes(G4VisAttributes(G4Colour::Cyan()));
 
