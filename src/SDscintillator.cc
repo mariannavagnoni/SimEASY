@@ -36,7 +36,7 @@ void MySensitiveDetector::Initialize(G4HCofThisEvent* hce)
 G4bool MySensitiveDetector::ProcessHits(G4Step *step, G4TouchableHistory *ROhist)
 {
     //Accessing the current step
-
+    
     G4StepPoint* preStepPoint = step->GetPreStepPoint();
     //G4StepPoint* postStepPoint = step->GetPostStepPoint();
     //G4ThreeVector pos1 = preStepPoint->GetPosition();
@@ -47,13 +47,9 @@ G4bool MySensitiveDetector::ProcessHits(G4Step *step, G4TouchableHistory *ROhist
     //G4cout << "ooOOOooo" << std::endl;
     
     G4TouchableHandle theTouchable = preStepPoint->GetTouchableHandle();
-    //G4int copyNo = theTouchable->GetCopyNumber();
+    G4int copyNo = theTouchable->GetCopyNumber(0);
     //G4cout << "Copy number of the scint volume: " << copyNo << G4endl;
-    //G4int motherCopyNo = theTouchable->GetVolume(1)->GetCopyNo();
-    //G4cout << "Copy number of the vacuum volume: " << motherCopyNo << G4endl;
-    G4int grandMotherCopyNo = theTouchable->GetCopyNumber(2);
-    //G4cout << "Copy number of the mother volume: " << grandMotherCopyNo << G4endl;
-   
+
     //G4double stepLength = step ->GetStepLength();
     //G4cout << "Step Length: " << stepLength /CLHEP::mm << G4endl;
     
@@ -65,7 +61,7 @@ G4bool MySensitiveDetector::ProcessHits(G4Step *step, G4TouchableHistory *ROhist
     //G4cout << "Edep " << energyDeposit / CLHEP::keV <<"keV, time " << timeDeposit / CHLEP::ns << " ns" << std::endl;
     hit->SetEdep(energyDeposit);
     hit->SetTime(timeDeposit);
-    hit->SetID(grandMotherCopyNo);
+    hit->SetID(copyNo);
 
     hitsCollection->insert(hit);
     
