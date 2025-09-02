@@ -274,7 +274,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         const G4String chamberName = "chamber";
         auto chamberMat = nist->FindOrBuildMaterial("G4_STAINLESS-STEEL");
 
+        bool chamberDetailed = true; // set true to include more details on the target chamber
         auto chamberSTL   = CADMesh::TessellatedMesh::FromSTL(STLpath + "G4_reaction_chamber.stl");
+        if(chamberDetailed) chamberSTL = CADMesh::TessellatedMesh::FromSTL(STLpath + "G4_gas_target_Detail_Low_NoInterference_Rotated_Repaired.stl");
         auto chamberLogic = new G4LogicalVolume(chamberSTL->GetSolid(), chamberMat, chamberName);
 
         chamberLogic->SetVisAttributes(G4VisAttributes(myColour));
