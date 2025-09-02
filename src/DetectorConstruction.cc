@@ -1,416 +1,416 @@
 #include "DetectorConstruction.hh"
-#include "G4RunManager.hh"
-#include "G4NistManager.hh"
-#include "G4SDManager.hh"
 
-#include "G4VSensitiveDetector.hh"
-#include "G4Material.hh"
-#include "G4SubtractionSolid.hh"
-#include "G4Box.hh"
-#include "G4Tubs.hh"
-#include "G4LogicalVolume.hh"
-#include "G4PVPlacement.hh"
-#include "G4SystemOfUnits.hh"
-#include "G4VisAttributes.hh"
-#include "G4Colour.hh"
-#include "G4MultiFunctionalDetector.hh"
-#include "G4PSEnergyDeposit.hh"
 #include <G4VTouchable.hh>
 #include <G4PVReplica.hh>
 #include "CADMesh.hh"
 
 DetectorConstruction::DetectorConstruction(): G4VUserDetectorConstruction()
-{}
+{
+    fWorldSize = 3.0*m;
+}
 
 DetectorConstruction::~DetectorConstruction()
 {}
 
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
-    G4String STLpath = "";
-    G4String versionSuffix = "";
-    // = v1 - 3 NaI crystals =
-    if (m_geometry == gVersionI)
-    {
-        STLpath = "../gastargetdrawing/drawings_v1/";
-        versionSuffix = "";
-    }
-    else if (m_geometry == gVersionII)
-    {
-        // = v2 - 6 shorter NaI crystals, radial arrangement =
-        STLpath = "../gastargetdrawing/drawings_v2/";
-        versionSuffix = "_II";
-    }
-    else if (m_geometry == gVersionIII)
-    {
-        // = v3 - 6 shorter NaI crystals, orthogonal arrangement =
-        STLpath = "../gastargetdrawing/drawings_v3/";
-        versionSuffix = "_III";
-    }
-    else if (m_geometry == gVersionIV)
-    {
-        // = v4 - (???) =
-        STLpath = "../gastargetdrawing/drawings_v4/";
-        versionSuffix = "_IV";
-    }
-    else if (m_geometry == gVersionV)
-    {
-        // = v5 - (???) =
-        STLpath = "../gastargetdrawing/drawings_v5/";
-        versionSuffix = "_V";
-    }
-    else if (m_geometry == gCylinder)
-    {
-        // Get gas and chamber from v1
-        STLpath = "../gastargetdrawing/drawings_v1/";
-        versionSuffix = "";
-    }
-    else
-    {
-        G4cerr << "Unknown geometry, or geometry not set." << G4endl;
-        exit(99);
-    }
+    // Aluminum external box dimensions
+    G4double box_length = 254*mm;
+    G4double box_side = 109*mm;
+    G4double box_thickness = 1*mm;
 
-    // Get nist material manager
-    auto nist = G4NistManager::Instance();
+    // Aluminum internal box dimensions
+    G4double box_inner_length = box_length - 2*box_thickness;
+    G4double box_inner_side = box_side - 2*box_thickness;
 
-    G4bool checkOverlaps = true;
-    G4RotationMatrix *noRotation = nullptr;
+    // NaI(Tl) crystal dimensions
+    G4double crystal_side = 102*mm;
+    G4double crystal_length = 203*mm;
 
+    // Support to the base of the crystal dimensions
+    G4double support_side = box_inner_side;
+    G4double support_length = 3.4*mm - box_thickness;
 
-    G4int FirstDetectorUp = 3; // 1 - conf1, 2 - conf2, 3 - conf3
-    /*World volume*/
+    // Reflector external dimensions
+    G4double reflector_side = box_inner_side;
+    G4double reflector_length = crystal_length;
 
-    // a box of air
-    G4VPhysicalVolume* worldPhys  = nullptr;
-    G4LogicalVolume*  worldLogic = nullptr;
+    // Reflector internal dimensions
+    G4double reflector_inner_side = reflector_side - 2*(3.4*mm - box_thickness);
+    G4double reflector_inner_length = reflector_length;
 
-    const G4String worldName = "world";
-    auto worldMat = nist->FindOrBuildMaterial("G4_AIR");
-    const G4double worldSize = 4.0*m;
+    // SiPM dimensions
+    G4double SiPM_side = 25*mm;
+    G4double SiPM_length = 1.35*mm;
 
-    G4VSolid* worldSolid = new G4Box(worldName, 0.5*worldSize, 0.5*worldSize, 0.5*worldSize);
+    // Quartz window dimensions
+    G4double quartz_side = crystal_side;
+    G4double quartz_length = 12.5*mm;
 
-    worldLogic = new G4LogicalVolume(worldSolid, worldMat, worldName);
+    // Lead brick support dimensions
+    G4double xLead = 19.8*cm;
+	G4double yLead = 8.8*cm;
+	G4double zLead = 5.0*cm;
+
+    // Hole in the lead brick
+    G4double xHole = 8.0 * cm;
+	G4double yHole = 0.1 * cm;
+	G4double zHole = 5.0 * cm;
+
+    // Cylindrical collimator in the lead brick
+    G4double rCylinder = 4.5 * mm;
+	G4double zCylinder = 5.0 * cm;
+
+    // Check geometry overlaps
+	G4bool checkOverlaps = true;
+
+    /*Variable to decide the experimental setup you want*/
+    // 0 - single NaI(Tl) setup with Pb brick as source collimator
+    // 1 - gas target in the center and different configurations of EASY array around it
+    G4int setup = 1;
+
+    /*Variable to decide the detector construction you want when you have seup = 1*/
+    // 0 - radial configuration
+    // 1 - rectangular configuration
+    G4int configuration = 1;
+
+    // For visualization
     G4VisAttributes* invis = new G4VisAttributes();
     invis->SetVisibility(false);
-    worldLogic->SetVisAttributes(invis);
 
-    worldPhys = new G4PVPlacement(noRotation, G4ThreeVector(), worldLogic, worldName, 0, false, 0, checkOverlaps);
+    // Define materials
+    G4NistManager* nist = G4NistManager::Instance();
 
-    /*Gas volume*/
+    G4Material* matPb = nist->FindOrBuildMaterial("G4_Pb");
+    G4Material* matAl = nist->FindOrBuildMaterial("G4_Al");
+    G4Material* matNaI = nist->FindOrBuildMaterial("G4_SODIUM_IODIDE");
+    G4Material* matQuartz = nist->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+    G4Material* matMylar = nist->FindOrBuildMaterial("G4_MYLAR"); // Material of the support to the crystal base (?)
+    G4Material* matAir = nist->FindOrBuildMaterial("G4_AIR");
 
-    const G4String gasName = "gas";
+    // Color creation for visualization
+    G4Colour myGrey(192./255., 192./255., 192./255., 0.3);
+    G4Colour myYellow(1.0, 1.0, 0.0, 0.3);
+    G4Colour myCyan(0.5, 0.8, 0.9, 0.3);
+    G4Colour myViolet(0.294, 0.0, 0.510, 0.3);
+    G4Colour myBlack(0.0, 0.0, 0.0, 0.3);
+    G4Colour myBrown(165.0/255.0, 42.0/255.0, 42.0/255.0, 0.3);
+    G4Colour myLavander(0.902, 0.902, 0.980, 0.3);
+    G4Colour myGreen(0.0, 1.0, 0.0, 0.3);
 
-    // Define gas
-    const auto Ne22_atomicMass = 21.991385110*g/mole;
-    auto elNe22 = new G4Element("Neon_22","Ne22", 10, Ne22_atomicMass);
+    /*World definition*/
+	G4Box *solidWorld = new G4Box("solidWorld", fWorldSize/2, fWorldSize/2, fWorldSize/2);
+	G4LogicalVolume *logicWorld = new G4LogicalVolume(solidWorld, matAir, "logicWorld");
+	logicWorld->SetVisAttributes(invis);
+	G4VPhysicalVolume *physWorld = new G4PVPlacement(0, G4ThreeVector(0., 0., 0.), logicWorld, "physWorld", 0, false, 0, checkOverlaps);
 
-    const auto R = 8.205736608e+1*cm3*atmosphere/(kelvin*mole);
-    const auto Ne22gas_pressure = 3e-3*atmosphere; // 1 atm = 1.01325 bar
-    const auto Ne22gas_temperature = 293*kelvin;
-    const auto Ne22gas_density = Ne22_atomicMass*Ne22gas_pressure/(R*Ne22gas_temperature);
+    if(setup == 0){
 
-    auto gasMat = new G4Material("Ne22_gas", Ne22gas_density, 1, kStateGas, Ne22gas_temperature, Ne22gas_pressure);
-    gasMat->AddElement(elNe22, 100.*perCent);
+        // LEAD BRICK CONSTRUCTION
+        // Pb brick with a hole and a cylindrical collimator
+	    G4Box *solidLead = new G4Box("solidLead", xLead/2, yLead/2, zLead/2);
+        G4Box *solidHole = new G4Box("solidHole", xHole/2, yHole/2, zHole/2);
+        G4SubtractionSolid* subtraction1 = new G4SubtractionSolid("Subtraction1", solidLead, solidHole); // subraction of the hole from the lead brick
+        G4Tubs *solidCylinder = new G4Tubs("solidCylinder", 0., 0.5*rCylinder, 0.5*zCylinder, 0., 360. * deg);
+        G4SubtractionSolid* subtraction2 = new G4SubtractionSolid("Subtraction2", subtraction1, solidCylinder); // subraction of the cylindrical collimator from the lead brick
 
-    auto gasSTL   = CADMesh::TessellatedMesh::FromSTL(STLpath + "G4_22Ne_gas.stl");
-    auto gasLogic = new G4LogicalVolume(gasSTL->GetSolid(), gasMat, gasName);
+        // Create logical volume and physical volume using the subtracted solid volume
+        G4LogicalVolume *logicLead = new G4LogicalVolume(subtraction2, matPb, "logicLead");
 
-    gasLogic->SetVisAttributes(G4VisAttributes(G4Colour::Cyan()));
+        // Define the Pb brick position respet to the detector one
+        G4double brick_y = (box_side/2) + (zLead/2);
+        G4double brick_position = -22.1*mm; // The center of the Pb brick is at the NaI(Tl) crystal
 
-    new G4PVPlacement(noRotation, G4ThreeVector(), gasLogic, gasName, worldLogic, false, 0, checkOverlaps);
+        // Angle definition to rotate the crystal
+        G4RotationMatrix* rot = new G4RotationMatrix();
+        rot->rotateX(90.*deg);
+        rot->rotateZ(180.*deg);
 
-    /*Target chamber*/
+        G4VPhysicalVolume *physLead = new G4PVPlacement(rot, G4ThreeVector(0., -brick_y, brick_position), logicLead, "physLead", logicWorld, false, 0, checkOverlaps);
 
-    G4Colour myColour(113./255., 121./255., 126./255.);
-    //Ash grey
-    //G4Colour myColour( 178./255., 190./255., 181./255.);
+        G4VisAttributes *leadVisAtt = new G4VisAttributes(myGrey);
+        leadVisAtt->SetForceSolid(true);
+        logicLead->SetVisAttributes(leadVisAtt);
 
-    const G4String chamberName = "chamber";
-    auto chamberMat = nist->FindOrBuildMaterial("G4_STAINLESS-STEEL");
+        // NaI(Tl) CRYSTAL CONSTRUCTION
+        // Create detector components
+        G4Box* solidExternalAlBox = new G4Box("ExternalAlBox", box_side/2, box_side/2, box_length/2);
+        G4Box* solidInnerAlBox = new G4Box("InnerAlBox", box_inner_side/2, box_inner_side/2, box_inner_length/2);
+        G4SubtractionSolid* solidAlBox = new G4SubtractionSolid("AlBox", solidExternalAlBox, solidInnerAlBox);
+        G4Box* solidExternalReflector = new G4Box("ExternalReflector", reflector_side/2, reflector_side/2, reflector_length/2);
+        G4Box* solidInnerReflector = new G4Box("InnerReflector", reflector_inner_side/2, reflector_inner_side/2, reflector_inner_length/2);
+        G4SubtractionSolid* solidReflector = new G4SubtractionSolid("Reflector", solidExternalReflector, solidInnerReflector);
+        G4Box* solidCrystal = new G4Box("Crystal", crystal_side/2, crystal_side/2, crystal_length/2);
+        G4Box* solidQuartz = new G4Box("Quartz", quartz_side/2, quartz_side/2, quartz_length/2);
+        G4Box* solidSiPM = new G4Box("SiPM", SiPM_side/2, SiPM_side/2, SiPM_length/2);
+        G4Box* solidSupport = new G4Box("Support", support_side/2, support_side/2, support_length/2);
 
-    bool chamberDetailed = true; // set true to include more details on the target chamber
-    auto chamberSTL = CADMesh::TessellatedMesh::FromSTL(STLpath + "G4_reaction_chamber.stl");;
-    if(chamberDetailed) chamberSTL = CADMesh::TessellatedMesh::FromSTL(STLpath + "G4_gas_target_Detail_Low_NoInterference_Rotated_Repaired.stl");
-    auto chamberLogic = new G4LogicalVolume(chamberSTL->GetSolid(), chamberMat, chamberName);
+        // Create logical volumes
+        G4LogicalVolume* logicAlBox = new G4LogicalVolume(solidAlBox, matPb, "AlBox");
+        G4LogicalVolume* logicReflector = new G4LogicalVolume(solidReflector, matMylar, "Reflector");
+        logicCrystal = new G4LogicalVolume(solidCrystal, matNaI, "Crystal");
+        G4LogicalVolume* logicQuartz = new G4LogicalVolume(solidQuartz, matQuartz, "Quartz");
+        G4LogicalVolume* logicSiPM = new G4LogicalVolume(solidSiPM, matAl, "SiPM");
+        G4LogicalVolume* logicSupport = new G4LogicalVolume(solidSupport, matAl, "Support");
 
-    chamberLogic->SetVisAttributes(G4VisAttributes(myColour));
+        // Set visualization attributes
+        G4VisAttributes *AlBoxVisAtt = new G4VisAttributes(myGrey);
+        AlBoxVisAtt->SetForceSolid(true);
+        logicAlBox->SetVisAttributes(AlBoxVisAtt);
+        //G4VisAttributes *ReflectorVisAtt = new G4VisAttributes(myYellow);
+        //ReflectorVisAtt->SetForceSolid(true);
+        //logicReflector->SetVisAttributes(ReflectorVisAtt);
+        logicReflector->SetVisAttributes(invis); // invisible reflector
+        G4VisAttributes *CrystalVisAtt = new G4VisAttributes(myCyan);
+        CrystalVisAtt->SetForceSolid(true);
+        logicCrystal->SetVisAttributes(CrystalVisAtt);
+        G4VisAttributes *QuartzVisAtt = new G4VisAttributes(myLavander);
+        QuartzVisAtt->SetForceSolid(true);
+        logicQuartz->SetVisAttributes(QuartzVisAtt);
+        G4VisAttributes *SiPMVisAtt = new G4VisAttributes(myBlack);
+        SiPMVisAtt->SetForceSolid(true);
+        logicSiPM->SetVisAttributes(SiPMVisAtt);
+        G4VisAttributes *SupportVisAtt = new G4VisAttributes(myViolet);
+        SupportVisAtt->SetForceSolid(true);
+        logicSupport->SetVisAttributes(SupportVisAtt);
 
-    new G4PVPlacement(noRotation, G4ThreeVector(), chamberLogic, chamberName, worldLogic, false, 0, checkOverlaps);
+        // Define detector component positions relative to Al box that is in the center of the world volume
+        G4double albox_z = 0.0*mm;
+        G4double crystal_z = -22.1*mm;
+        G4double reflector_z = crystal_z;
+        G4double quartz_z = 79.4*mm + (quartz_length/2);
+        G4double SiPM_z = quartz_z + (quartz_length/2) + (SiPM_length/2);
+        G4double support_z = 22.1*mm + (crystal_length/2) + (support_length/2);
 
-    /* Scintillator Enclosure */
+        // Angle definition to rotate the crystal
+        G4RotationMatrix* rotZ = new G4RotationMatrix();
+        rotZ->rotateZ(90.*deg);
 
-    G4Colour myGrey1(192./255., 192./255., 192./255., 0.5);
-    G4Colour myGrey2(221./255., 221./255., 221./255., 0.5);
-    // Create a new color called myazure that is a light blue
-    G4Colour myAzure(135./255., 206./255., 235./255., 0.3);
-    // Create a new color called myblack that is a grey different from the gas target one
-    G4Colour myGrey3(80./255., 80./255., 80./255., 0.7);
-
-    //G4 box
-    double wallThickness = 1.*CLHEP::mm;
-    double px = (109./2.)*CLHEP::mm;
-    double py = (109./2.)*CLHEP::mm;
-    double pz = (254./2.)*CLHEP::mm;
-
-    //Aluminum Box
-    auto outerBox = new G4Box("Outer", px,py,pz);
-    //Create a logical volume
-
-    auto coverMat = nist->FindOrBuildMaterial("G4_Al");
-
-    G4LogicalVolume *enclosure= new G4LogicalVolume(outerBox, coverMat, "Outer Box Logic",0,0,0);
-    //G4VisAttributes *enclosureVis = new G4VisAttributes(myGrey2);
-    G4VisAttributes *enclosureVisAtt = new G4VisAttributes(myGrey3); // change the color and transparancy of the aluminum box
-	enclosureVisAtt->SetForceSolid(true);
-	enclosure->SetVisAttributes(enclosureVisAtt);
-    //enclosure ->SetVisAttributes(enclosureVis);
-
-    //Air Vacuum box
-    auto innerBox = new G4Box("Inner", px-wallThickness,py-wallThickness,pz-wallThickness);
-    //insert vacuum between enclosure and scintillator crystal
-    auto const vacuum_Z= 1.;
-    auto const vacuum_A = 1.01*g/mole;
-    auto const vacuum_density = 1.e-25*g/cm3; // universe_mean_density
-    auto vacuumMat = new G4Material("Galactic", vacuum_Z, vacuum_A, vacuum_density, kStateGas, 273*kelvin, 3.e-18*pascal);
-
-    G4LogicalVolume *innerBoxlogic = new G4LogicalVolume (innerBox, vacuumMat, "Inner Box Logic",0,0,0);
-    //innerBoxlogic->SetVisAttributes(G4VisAttributes (myGrey1));
-    innerBoxlogic->SetVisAttributes(invis);
-
-    /* Scintillator */
-    const G4String scintName = "scint";
-    auto scintMat = nist->FindOrBuildMaterial("G4_SODIUM_IODIDE");
-    //auto scintMat = new G4Material("NaI(Tl)", 3.667*g/cm3, 2);
-    //auto activator = nist->FindOrBuildElement("G4_Tl");
-    //auto SodiumIodide = nist->FindOrBuildMaterial("G4_SODIUM_IODIDE");
-
-    //G4double activatorFraction = 0.000001;
-    //G4double SodiumIodideFraction = 1.0 - activatorFraction;
-    //scintMat->AddElement(activator,activatorFraction);
-    //scintMat->AddMaterial(SodiumIodide,SodiumIodideFraction);
-
-    //G4 box
-    double x = (102./2.)*CLHEP::mm;
-    double y = (102./2.)*CLHEP::mm;
-    double z = (203./2.)*CLHEP::mm;
-    auto scintSolid= new G4Box("Scint_solid", x,y,z); // its size
-
-    auto scintLogic = new G4LogicalVolume(scintSolid, scintMat, scintName);
-    //scintLogic->SetVisAttributes(G4VisAttributes(G4Colour::Cyan()));
-    G4VisAttributes *scintVisAtt = new G4VisAttributes(myAzure); // change the color and transparancy of the NaI
-	scintVisAtt->SetForceSolid(true);
-	scintLogic->SetVisAttributes(scintVisAtt);
-
-    G4int imax = 6;
-    G4int shift = 54.5*CLHEP::mm;
-    double r = 15*CLHEP::cm; // r = 14.98 cm means crystals' angle are nearby
-
-    G4ThreeVector pos_in = G4ThreeVector(0, 0, 0.*CLHEP::mm);
-    G4ThreeVector pos_scint = G4ThreeVector(0, 0, 0.*CLHEP::mm - 23.8*CLHEP::mm);
-
-    G4PVPlacement* crystal = new G4PVPlacement(0, pos_scint, scintLogic, scintName, innerBoxlogic, false, 0, checkOverlaps);
-
-    G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
-
-    if(FirstDetectorUp == 1){
-
-        double theta = 1*(360./imax)*CLHEP::degree;
-
-        G4RotationMatrix *rot=new G4RotationMatrix();
-
-        G4ThreeVector pos_out = G4ThreeVector(r*cos(theta), r*sin(theta), 0.*CLHEP::mm);
-
-        for(int i=1; i<=imax; i++){
-            double theta=i*(360./imax)*CLHEP::degree;
-
-            G4RotationMatrix *rot=new G4RotationMatrix();
-            rot->rotateZ(-1*theta);
-
-            G4ThreeVector pos_out = G4ThreeVector(r*cos(theta), r*sin(theta), 0.*CLHEP::mm);
-
-            G4PVPlacement* Al_enclosure = new G4PVPlacement(rot, pos_out, enclosure, "Outer Box Logic", worldLogic, false, i, checkOverlaps);
-
-           if((enclosure->GetNoDaughters())== 0)
-
-            {
-                G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
-
-                if((innerBoxlogic->GetNoDaughters())== 0){
-                    G4PVPlacement* crystal = new G4PVPlacement(0, pos_scint, scintLogic, scintName, innerBoxlogic, false, 0, checkOverlaps);
-                }
-                else{
-
-                    G4cout << "Daughter volume already exists" << std::endl;
-                }
-
-            }
-            else
-            {
-                G4cout << "Daughter volume already exists" << std::endl;
-            }
-
-        }
-    }
-    if(FirstDetectorUp == 2){
-        double theta = 0*(360./imax)*CLHEP::degree;
-
-        G4RotationMatrix *rot=new G4RotationMatrix();
-
-        G4ThreeVector pos_out = G4ThreeVector(r*cos(theta), r*sin(theta), 0.*CLHEP::mm);
-
-        for(int i=1; i<=imax; i++){
-            double theta=i*(360./imax)*CLHEP::degree;
-            //double theta=0*CLHEP::degree;
-
-            G4RotationMatrix *rot=new G4RotationMatrix();
-            //rot->rotateZ(-1*theta);
-            rot->rotateZ(theta);
-
-            G4ThreeVector pos_out = G4ThreeVector(r*sin(theta), r*cos(theta), 0.*CLHEP::mm);
-
-            G4PVPlacement* Al_enclosure = new G4PVPlacement(rot, pos_out, enclosure, "Outer Box Logic", worldLogic, false, i, checkOverlaps);
-
-           if((enclosure->GetNoDaughters())== 0)
-
-            {
-                G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
-
-                if((innerBoxlogic->GetNoDaughters())== 0){
-                    G4PVPlacement* crystal = new G4PVPlacement(0, pos_scint, scintLogic, scintName, innerBoxlogic, false, 0, checkOverlaps);
-                }
-                else{
-
-                    G4cout << "Daughter volume already exists" << std::endl;
-                }
-
-            }
-            else
-            {
-                G4cout << "Daughter volume already exists" << std::endl;
-            }
-        }
-    }
-    if(FirstDetectorUp == 3){
-
-        double r = 12*CLHEP::cm;
-
-        // crystal 1
-        double theta1 = 15*CLHEP::degree;
-        G4RotationMatrix *rot1=new G4RotationMatrix();
-        rot1->rotateZ(theta1);
-        G4ThreeVector pos_out1 = G4ThreeVector(r*sin(theta1), r*cos(theta1), 0.*CLHEP::mm) + G4ThreeVector(54.5*cos(theta1), -54.5*sin(theta1), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure1 = new G4PVPlacement(rot1, pos_out1, enclosure, "Outer Box Logic", worldLogic, false, 1, checkOverlaps);
-        if((enclosure->GetNoDaughters())== 0){
-            G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
-            if((innerBoxlogic->GetNoDaughters())== 0){
-                G4PVPlacement* crystal = new G4PVPlacement(0, pos_scint, scintLogic, scintName, innerBoxlogic, false, 0, checkOverlaps);
-            }
-            else{
-                G4cout << "Daughter volume already exists" << std::endl;
-            }
-        }else{
-            G4cout << "Daughter volume already exists" << std::endl;
-        }
-
-        // crystal 2
-        double theta2 = 15*CLHEP::degree;
-        G4RotationMatrix *rot2=new G4RotationMatrix();
-        rot2->rotateZ(theta2);
-        G4ThreeVector pos_out2 = G4ThreeVector(r*sin(theta2), r*cos(theta2), 0.*CLHEP::mm) + G4ThreeVector(-54.5*cos(theta2), 54.5*sin(theta2), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure2 = new G4PVPlacement(rot2, pos_out2, enclosure, "Outer Box Logic", worldLogic, false, 2, checkOverlaps);
-        if((enclosure->GetNoDaughters())== 0){
-            G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
-            if((innerBoxlogic->GetNoDaughters())== 0){
-                G4PVPlacement* crystal = new G4PVPlacement(0, pos_scint, scintLogic, scintName, innerBoxlogic, false, 0, checkOverlaps);
-            }
-            else{
-                G4cout << "Daughter volume already exists" << std::endl;
-            }
-        }else{
-            G4cout << "Daughter volume already exists" << std::endl;
-        }
-
-        // crystal 3
-        double theta3 = 15*CLHEP::degree;
-        G4RotationMatrix *rot3=new G4RotationMatrix();
-        rot3->rotateZ(theta3);
-        G4ThreeVector pos_out3 = G4ThreeVector(r*sin(theta3), r*cos(theta3), 0.*CLHEP::mm) + G4ThreeVector(-109*cos(theta3), 109*sin(theta3), 0.*CLHEP::mm) + G4ThreeVector(-109*sin(theta3), -109*cos(theta3), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure3 = new G4PVPlacement(rot3, pos_out3, enclosure, "Outer Box Logic", worldLogic, false, 3, checkOverlaps);
-        if((enclosure->GetNoDaughters())== 0){
-            G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
-            if((innerBoxlogic->GetNoDaughters())== 0){
-                G4PVPlacement* crystal = new G4PVPlacement(0, pos_scint, scintLogic, scintName, innerBoxlogic, false, 0, checkOverlaps);
-            }
-            else{
-                G4cout << "Daughter volume already exists" << std::endl;
-            }
-        }else{
-            G4cout << "Daughter volume already exists" << std::endl;
-        }
-
-        // crystal 4
-        double theta4 = 15*CLHEP::degree;
-        G4RotationMatrix *rot4=new G4RotationMatrix();
-        rot4->rotateZ(theta4);
-        G4ThreeVector pos_out4 = G4ThreeVector(r*sin(theta4), r*cos(theta4), 0.*CLHEP::mm) + G4ThreeVector(109*cos(theta4), -109*sin(theta4), 0.*CLHEP::mm) + G4ThreeVector(-109*sin(theta3), -109*cos(theta3), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure4 = new G4PVPlacement(rot4, pos_out4, enclosure, "Outer Box Logic", worldLogic, false, 4, checkOverlaps);
-        if((enclosure->GetNoDaughters())== 0){
-            G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
-            if((innerBoxlogic->GetNoDaughters())== 0){
-                G4PVPlacement* crystal = new G4PVPlacement(0, pos_scint, scintLogic, scintName, innerBoxlogic, false, 0, checkOverlaps);
-            }
-            else{
-                G4cout << "Daughter volume already exists" << std::endl;
-            }
-        }else{
-            G4cout << "Daughter volume already exists" << std::endl;
-        }
-
-        // crystal 5
-        double theta5 = 15*CLHEP::degree;
-        G4RotationMatrix *rot5=new G4RotationMatrix();
-        rot5->rotateZ(theta5);
-        G4ThreeVector pos_out5 = G4ThreeVector(r*sin(theta5), r*cos(theta5), 0.*CLHEP::mm) + G4ThreeVector(-54.5*cos(theta5), 54.5*sin(theta5), 0.*CLHEP::mm) + G4ThreeVector(-(r+(2*109*CLHEP::mm-r))*sin(theta5), -(r+(2*109*CLHEP::mm-r))*cos(theta5), 0.*CLHEP::mm); //2*109 - (120=12 cm of radius)
-        G4PVPlacement* Al_enclosure5 = new G4PVPlacement(rot5, pos_out5, enclosure, "Outer Box Logic", worldLogic, false, 5, checkOverlaps);
-        if((enclosure->GetNoDaughters())== 0){
-            G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
-            if((innerBoxlogic->GetNoDaughters())== 0){
-                G4PVPlacement* crystal = new G4PVPlacement(0, pos_scint, scintLogic, scintName, innerBoxlogic, false, 0, checkOverlaps);
-            }
-            else{
-                G4cout << "Daughter volume already exists" << std::endl;
-            }
-        }else{
-            G4cout << "Daughter volume already exists" << std::endl;
-        }
-
-        // crystal 6
-        double theta6 = 15*CLHEP::degree;
-        G4RotationMatrix *rot6=new G4RotationMatrix();
-        rot6->rotateZ(theta6);
-        G4ThreeVector pos_out6 = G4ThreeVector(r*sin(theta6), r*cos(theta6), 0.*CLHEP::mm) + G4ThreeVector(54.5*cos(theta6), -54.5*sin(theta6), 0.*CLHEP::mm) + G4ThreeVector(-(r+(2*109*CLHEP::mm-r))*sin(theta6), -(r+(2*109*CLHEP::mm-r))*cos(theta6), 0.*CLHEP::mm);
-        G4PVPlacement* Al_enclosure6 = new G4PVPlacement(rot6, pos_out6, enclosure, "Outer Box Logic", worldLogic, false, 6, checkOverlaps);
-        if((enclosure->GetNoDaughters())== 0){
-            G4PVPlacement* vacuum = new G4PVPlacement(0, pos_in, innerBoxlogic, "Inner Box Logic", enclosure, false,  0, checkOverlaps);
-            if((innerBoxlogic->GetNoDaughters())== 0){
-                G4PVPlacement* crystal = new G4PVPlacement(0, pos_scint, scintLogic, scintName, innerBoxlogic, false, 0, checkOverlaps);
-            }
-            else{
-                G4cout << "Daughter volume already exists" << std::endl;
-            }
-        }else{
-            G4cout << "Daughter volume already exists" << std::endl;
-        }
+        // Place detector components
+        new G4PVPlacement(rotZ, G4ThreeVector(0, 0, albox_z), logicAlBox, "AlBox", logicWorld, false, 0, true);
+        new G4PVPlacement(0, G4ThreeVector(0, 0, reflector_z), logicReflector, "Reflector", logicWorld, false, 0, true);
+        new G4PVPlacement(0, G4ThreeVector(0, 0, crystal_z), logicCrystal, "Crystal", logicWorld, false, 0, true);
+        new G4PVPlacement(0, G4ThreeVector(0, 0, quartz_z), logicQuartz, "Quartz", logicWorld, false, 0, true);
+        new G4PVPlacement(0, G4ThreeVector(0, 0, SiPM_z), logicSiPM, "SiPM", logicWorld, false, 0, true);
+        new G4PVPlacement(0, G4ThreeVector(0, 0, -support_z), logicSupport, "Support", logicWorld, false, 0, true);
 
     }
+    else{
 
-    return worldPhys;
+        // CAD GAS TARGET PROJECT
+        G4String STLpath = "";
+        G4String versionSuffix = "";
+        // = v1 - 3 NaI crystals =
+        if (m_geometry == gVersionI)
+        {
+            STLpath = "../gastargetdrawing/drawings_v1/";
+            versionSuffix = "";
+        }
+        else if (m_geometry == gVersionII)
+        {
+            // = v2 - 6 shorter NaI crystals, radial arrangement =
+            STLpath = "../gastargetdrawing/drawings_v2/";
+            versionSuffix = "_II";
+        }
+        else if (m_geometry == gVersionIII)
+        {
+            // = v3 - 6 shorter NaI crystals, orthogonal arrangement =
+            STLpath = "../gastargetdrawing/drawings_v3/";
+            versionSuffix = "_III";
+        }
+        else if (m_geometry == gVersionIV)
+        {
+            // = v4 - (???) =
+            STLpath = "../gastargetdrawing/drawings_v4/";
+            versionSuffix = "_IV";
+        }
+        else if (m_geometry == gVersionV)
+        {
+            // = v5 - (???) =
+            STLpath = "../gastargetdrawing/drawings_v5/";
+            versionSuffix = "_V";
+        }
+        else if (m_geometry == gCylinder)
+        {
+            // Get gas and chamber from v1
+            STLpath = "../gastargetdrawing/drawings_v1/";
+            versionSuffix = "";
+        }
+        else
+        {
+            G4cerr << "Unknown geometry, or geometry not set." << G4endl;
+            exit(99);
+        }
+        // CAD GAS TARGET PROJECT
+
+        // GAS VOLUME
+        const G4String gasName = "gas";
+
+        // Define gas
+        const auto Ne22_atomicMass = 21.991385110*g/mole;
+        auto elNe22 = new G4Element("Neon_22","Ne22", 10, Ne22_atomicMass);
+
+        const auto R = 8.205736608e+1*cm3*atmosphere/(kelvin*mole);
+        const auto Ne22gas_pressure = 3e-3*atmosphere; // 1 atm = 1.01325 bar
+        const auto Ne22gas_temperature = 293*kelvin;
+        const auto Ne22gas_density = Ne22_atomicMass*Ne22gas_pressure/(R*Ne22gas_temperature);
+
+        auto gasMat = new G4Material("Ne22_gas", Ne22gas_density, 1, kStateGas, Ne22gas_temperature, Ne22gas_pressure);
+        gasMat->AddElement(elNe22, 100.*perCent);
+
+        auto gasSTL   = CADMesh::TessellatedMesh::FromSTL(STLpath + "G4_22Ne_gas.stl");
+        auto gasLogic = new G4LogicalVolume(gasSTL->GetSolid(), gasMat, gasName);
+
+        gasLogic->SetVisAttributes(G4VisAttributes(G4Colour::Cyan()));
+
+        new G4PVPlacement(0, G4ThreeVector(), gasLogic, gasName, logicWorld, false, 0, checkOverlaps);
+
+        // TARGET CHAMBER
+
+        G4Colour myColour(113./255., 121./255., 126./255.);
+        //Ash grey
+        //G4Colour myColour( 178./255., 190./255., 181./255.);
+
+        const G4String chamberName = "chamber";
+        auto chamberMat = nist->FindOrBuildMaterial("G4_STAINLESS-STEEL");
+
+        auto chamberSTL   = CADMesh::TessellatedMesh::FromSTL(STLpath + "G4_reaction_chamber.stl");
+        auto chamberLogic = new G4LogicalVolume(chamberSTL->GetSolid(), chamberMat, chamberName);
+
+        chamberLogic->SetVisAttributes(G4VisAttributes(myColour));
+
+        new G4PVPlacement(0, G4ThreeVector(), chamberLogic, chamberName, logicWorld, false, 0, checkOverlaps);
+
+        // NaI(Tl) CRYSTAL CONSTRUCTION
+        // Create detector components
+        G4Box* solidExternalAlBox = new G4Box("ExternalAlBox", box_side/2, box_side/2, box_length/2);
+        G4Box* solidInnerAlBox = new G4Box("InnerAlBox", box_inner_side/2, box_inner_side/2, box_inner_length/2);
+        G4SubtractionSolid* solidAlBox = new G4SubtractionSolid("AlBox", solidExternalAlBox, solidInnerAlBox);
+        G4Box* solidExternalReflector = new G4Box("ExternalReflector", reflector_side/2, reflector_side/2, reflector_length/2);
+        G4Box* solidInnerReflector = new G4Box("InnerReflector", reflector_inner_side/2, reflector_inner_side/2, reflector_inner_length/2);
+        G4SubtractionSolid* solidReflector = new G4SubtractionSolid("Reflector", solidExternalReflector, solidInnerReflector);
+        G4Box* solidCrystal = new G4Box("Crystal", crystal_side/2, crystal_side/2, crystal_length/2);
+        G4Box* solidQuartz = new G4Box("Quartz", quartz_side/2, quartz_side/2, quartz_length/2);
+        G4Box* solidSiPM = new G4Box("SiPM", SiPM_side/2, SiPM_side/2, SiPM_length/2);
+        G4Box* solidSupport = new G4Box("Support", support_side/2, support_side/2, support_length/2);
+
+        // Create logical volumes
+        G4LogicalVolume* logicAlBox = new G4LogicalVolume(solidAlBox, matPb, "AlBox");
+        G4LogicalVolume* logicReflector = new G4LogicalVolume(solidReflector, matMylar, "Reflector");
+        logicCrystal = new G4LogicalVolume(solidCrystal, matNaI, "Crystal");
+        G4LogicalVolume* logicQuartz = new G4LogicalVolume(solidQuartz, matQuartz, "Quartz");
+        G4LogicalVolume* logicSiPM = new G4LogicalVolume(solidSiPM, matAl, "SiPM");
+        G4LogicalVolume* logicSupport = new G4LogicalVolume(solidSupport, matAl, "Support");
+
+        // Set visualization attributes
+        G4VisAttributes *AlBoxVisAtt = new G4VisAttributes(myGrey);
+        AlBoxVisAtt->SetForceSolid(true);
+        logicAlBox->SetVisAttributes(AlBoxVisAtt);
+        //G4VisAttributes *ReflectorVisAtt = new G4VisAttributes(myYellow);
+        //ReflectorVisAtt->SetForceSolid(true);
+        //logicReflector->SetVisAttributes(ReflectorVisAtt);
+        logicReflector->SetVisAttributes(invis); // invisible reflector
+        G4VisAttributes *CrystalVisAtt = new G4VisAttributes(myCyan);
+        CrystalVisAtt->SetForceSolid(true);
+        logicCrystal->SetVisAttributes(CrystalVisAtt);
+        G4VisAttributes *QuartzVisAtt = new G4VisAttributes(myLavander);
+        QuartzVisAtt->SetForceSolid(true);
+        logicQuartz->SetVisAttributes(QuartzVisAtt);
+        G4VisAttributes *SiPMVisAtt = new G4VisAttributes(myBlack);
+        SiPMVisAtt->SetForceSolid(true);
+        logicSiPM->SetVisAttributes(SiPMVisAtt);
+        G4VisAttributes *SupportVisAtt = new G4VisAttributes(myViolet);
+        SupportVisAtt->SetForceSolid(true);
+        logicSupport->SetVisAttributes(SupportVisAtt);
+
+        // Define detector component positions relative to Al box that is in the center of the world volume
+        G4double albox_z = 0.0*mm;
+        G4double crystal_z = -22.1*mm;
+        G4double reflector_z = crystal_z;
+        G4double quartz_z = 79.4*mm + (quartz_length/2);
+        G4double SiPM_z = quartz_z + (quartz_length/2) + (SiPM_length/2);
+        G4double support_z = 22.1*mm + (crystal_length/2) + (support_length/2);
+
+        // RADIAL CONFIGURATION
+        if(configuration == 0){
+
+            G4double radius = 150.0 * mm;
+            G4int imax = 6;
+
+            for (int i = 0; i < imax; ++i) {
+
+                G4double angle = i * (360.0/imax) * deg;
+
+                G4double x = radius * std::cos(angle);
+                G4double y = radius * std::sin(angle);
+                G4double z = 0.0 * mm;
+
+                G4RotationMatrix* rot = new G4RotationMatrix();
+                rot->rotateZ(-1*angle);
+
+                G4ThreeVector posAlBox(x, y, z + 0.0*mm);
+                G4ThreeVector posReflector(x, y, z + (-22.1*mm));
+                G4ThreeVector posCrystal(x, y, z + (-22.1*mm));
+                G4ThreeVector posQuartz(x, y, z + 79.4*mm + (quartz_length/2));
+                G4ThreeVector posSiPM(x, y, z + quartz_z + (quartz_length/2) + (SiPM_length/2));
+                G4ThreeVector posSupport(x, y, z - (22.1*mm + (crystal_length/2) + (support_length/2)));
+
+                new G4PVPlacement(rot, posAlBox, logicAlBox, "AlBox", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posReflector, logicReflector, "Reflector", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posCrystal, logicCrystal, "Crystal", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posQuartz, logicQuartz, "Quartz", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posSiPM, logicSiPM, "SiPM", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posSupport, logicSupport, "Support", logicWorld, false, i, true);
+            }
+        }
+
+        // RECTANGULAR CONFIGURATION
+        if(configuration == 1){
+
+            G4double d = 115.0 * mm;
+            G4double offset_3_4 = 20.0 * mm;
+
+            // vector of vectors, each vector inside is the position of a single crystal in the configuration
+            std::vector<G4ThreeVector> positions = {
+                G4ThreeVector(-d/2,  d, 0),  // modulo 1 (alto sinistra)
+                G4ThreeVector( d/2,  d, 0),  // modulo 2 (alto destra)
+                G4ThreeVector(-d+offset_3_4, 0, 0),  // modulo 3 (sinistra)
+                G4ThreeVector( d-offset_3_4, 0, 0),  // modulo 4 (destra)
+                G4ThreeVector(-d/2, -d, 0),  // modulo 5 (basso sinistra)
+                G4ThreeVector( d/2, -d, 0)   // modulo 6 (basso destra)
+            };
+
+            for (size_t i = 0; i < positions.size(); ++i) {
+
+                G4RotationMatrix* rot = new G4RotationMatrix();
+                rot->rotateZ(0); // oppure usa `0` se non vuoi rotazione
+
+                G4ThreeVector posAlBox = positions[i] + G4ThreeVector(0, 0, albox_z);
+                G4ThreeVector posReflector = positions[i] + G4ThreeVector(0, 0, reflector_z);
+                G4ThreeVector posCrystal = positions[i] + G4ThreeVector(0, 0, crystal_z);
+                G4ThreeVector posQuartz = positions[i] + G4ThreeVector(0, 0, quartz_z);
+                G4ThreeVector posSiPM = positions[i] + G4ThreeVector(0, 0, SiPM_z);
+                G4ThreeVector posSupport = positions[i] + G4ThreeVector(0, 0, -support_z);
+
+                new G4PVPlacement(rot, posAlBox, logicAlBox, "AlBox", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posReflector, logicReflector, "Reflector", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posCrystal, logicCrystal, "Crystal", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posQuartz, logicQuartz, "Quartz", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posSiPM, logicSiPM, "SiPM", logicWorld, false, i, true);
+                new G4PVPlacement(rot, posSupport, logicSupport, "Support", logicWorld, false, i, true);
+            }
+
+        }
+
+    }
+
+    return physWorld;
 }
+
 
 void DetectorConstruction::ConstructSDandField()
 {
+
     G4SDManager::GetSDMpointer()->SetVerboseLevel(1);
 
     // declare Scintillator as a MultiFunctionalDetector scorer
@@ -423,8 +423,8 @@ void DetectorConstruction::ConstructSDandField()
     //G4VPrimitiveScorer* scintPrimitive = new G4PSEnergyDeposit("Edep",0);
     //mfScint->RegisterPrimitive(scintPrimitive);
 
-    SetSensitiveDetector("scint", sdScint);
-    G4cout<< "Sensitive detector " << std::endl;
+    logicCrystal->SetSensitiveDetector(sdScint); //"scint" is the logic volume for array configuration
+
 }
 
 
