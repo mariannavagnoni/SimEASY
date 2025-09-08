@@ -372,16 +372,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
         if(configuration == 1){
 
             G4double d = 115.0 * mm;
-            G4double offset_3_4 = 0.0 * mm;
+            G4double offset = 10.0 * mm;
 
             // vector of vectors, each vector inside is the position of a single crystal in the configuration
             std::vector<G4ThreeVector> positions = {
-                G4ThreeVector(-d/2,  d, 0),  // modulo 1 (alto sinistra)
-                G4ThreeVector( d/2,  d, 0),  // modulo 2 (alto destra)
-                G4ThreeVector(-d+offset_3_4, 0, 0),  // modulo 3 (sinistra)
-                G4ThreeVector( d-offset_3_4, 0, 0),  // modulo 4 (destra)
-                G4ThreeVector(-d/2, -d, 0),  // modulo 5 (basso sinistra)
-                G4ThreeVector( d/2, -d, 0)   // modulo 6 (basso destra)
+                G4ThreeVector(-d/2,  d+offset, 0),  // modulo 1 (alto sinistra)
+                G4ThreeVector( d/2,  d+offset, 0),  // modulo 2 (alto destra)
+                G4ThreeVector(-d-offset, 0, 0), // modulo 3 (sinistra) 
+				G4ThreeVector( d+offset, 0, 0), // modulo 4 (destra)
+				G4ThreeVector(-d/2, -d-offset, 0), // modulo 5 (basso sinistra)
+				G4ThreeVector( d/2, -d-offset, 0) // modulo 6 (basso destra)
             };
 
             for (size_t i = 0; i < positions.size(); ++i) {
@@ -430,6 +430,7 @@ void DetectorConstruction::ConstructSDandField()
     logicCrystal->SetSensitiveDetector(sdScint); //"scint" is the logic volume for array configuration
 
 }
+
 
 
 
